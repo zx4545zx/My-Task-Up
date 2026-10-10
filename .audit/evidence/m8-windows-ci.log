@@ -1,0 +1,437 @@
+build	Set up job	﻿2026-10-10T21:38:11.4751870Z Current runner version: '2.337.0'
+build	Set up job	2026-10-10T21:38:11.4885740Z ##[group]Runner Image Provisioner
+build	Set up job	2026-10-10T21:38:11.4887101Z Hosted Compute Agent
+build	Set up job	2026-10-10T21:38:11.4887986Z Version: 20260901.588
+build	Set up job	2026-10-10T21:38:11.4889045Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+build	Set up job	2026-10-10T21:38:11.4890405Z Build Date: 2026-09-01T19:56:44Z
+build	Set up job	2026-10-10T21:38:11.4891525Z Worker ID: {b0283574-a311-43c6-a450-06cc24f92ae6}
+build	Set up job	2026-10-10T21:38:11.4892810Z Azure Region: northcentralus
+build	Set up job	2026-10-10T21:38:11.4893760Z ##[endgroup]
+build	Set up job	2026-10-10T21:38:11.4895653Z ##[group]Operating System
+build	Set up job	2026-10-10T21:38:11.4896377Z Microsoft Windows Server 2025
+build	Set up job	2026-10-10T21:38:11.4896943Z 10.0.26100
+build	Set up job	2026-10-10T21:38:11.4897446Z Datacenter
+build	Set up job	2026-10-10T21:38:11.4897909Z ##[endgroup]
+build	Set up job	2026-10-10T21:38:11.4898377Z ##[group]Runner Image
+build	Set up job	2026-10-10T21:38:11.4898980Z Image: windows-2025-vs2026
+build	Set up job	2026-10-10T21:38:11.4899528Z Version: 20260925.250.1
+build	Set up job	2026-10-10T21:38:11.4900606Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20260925.250/images/windows/Windows2025-VS2026-Readme.md
+build	Set up job	2026-10-10T21:38:11.4902554Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20260925.250
+build	Set up job	2026-10-10T21:38:11.4903520Z ##[endgroup]
+build	Set up job	2026-10-10T21:38:11.4904633Z ##[group]GITHUB_TOKEN Permissions
+build	Set up job	2026-10-10T21:38:11.4906624Z Contents: read
+build	Set up job	2026-10-10T21:38:11.4907206Z Metadata: read
+build	Set up job	2026-10-10T21:38:11.4907732Z Packages: read
+build	Set up job	2026-10-10T21:38:11.4908244Z ##[endgroup]
+build	Set up job	2026-10-10T21:38:11.4910463Z Secret source: Actions
+build	Set up job	2026-10-10T21:38:11.4911422Z Cache mode: write
+build	Set up job	2026-10-10T21:38:11.4912137Z Prepare workflow directory
+build	Set up job	2026-10-10T21:38:11.5304127Z Prepare all required actions
+build	Set up job	2026-10-10T21:38:11.5359522Z Getting action download info
+build	Set up job	2026-10-10T21:38:11.7286255Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+build	Set up job	2026-10-10T21:38:11.8711234Z Download action repository 'subosito/flutter-action@v2' (SHA:1a449444c387b1966244ae4d4f8c696479add0b2)
+build	Set up job	2026-10-10T21:38:12.0673290Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+build	Set up job	2026-10-10T21:38:12.4984609Z Getting action download info
+build	Set up job	2026-10-10T21:38:12.5774699Z Download action repository 'actions/cache@v5' (SHA:caa296126883cff596d87d8935842f9db880ef25)
+build	Set up job	2026-10-10T21:38:12.7859831Z Complete job name: build
+build	Run actions/checkout@v4	﻿2026-10-10T21:38:13.0068105Z ##[group]Run actions/checkout@v4
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0069942Z with:
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0070631Z   repository: zx4545zx/My-Task-Up
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0077489Z   token: ***
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0078160Z   ssh-strict: true
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0078821Z   ssh-user: git
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0079507Z   persist-credentials: true
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0080710Z   clean: true
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0081385Z   sparse-checkout-cone-mode: true
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0082170Z   fetch-depth: 1
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0082830Z   fetch-tags: false
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0083511Z   show-progress: true
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0084217Z   lfs: false
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0084903Z   submodules: false
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0085591Z   set-safe-directory: true
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0086373Z   allow-unsafe-pr-checkout: false
+build	Run actions/checkout@v4	2026-10-10T21:38:13.0087473Z ##[endgroup]
+build	Run actions/checkout@v4	2026-10-10T21:38:13.1702336Z Syncing repository: zx4545zx/My-Task-Up
+build	Run actions/checkout@v4	2026-10-10T21:38:13.1706074Z ##[group]Getting Git version info
+build	Run actions/checkout@v4	2026-10-10T21:38:13.1707520Z Working directory is 'D:\a\My-Task-Up\My-Task-Up'
+build	Run actions/checkout@v4	2026-10-10T21:38:13.2526479Z [command]"C:\Program Files\Git\bin\git.exe" version
+build	Run actions/checkout@v4	2026-10-10T21:38:13.9728174Z git version 2.55.0.windows.5
+build	Run actions/checkout@v4	2026-10-10T21:38:13.9775598Z ##[endgroup]
+build	Run actions/checkout@v4	2026-10-10T21:38:13.9795645Z Temporarily overriding HOME='D:\a\_temp\941a02f7-cef8-455e-9c00-e8a4e71bb571' before making global git config changes
+build	Run actions/checkout@v4	2026-10-10T21:38:13.9796615Z Adding repository directory to the temporary git global config as a safe directory
+build	Run actions/checkout@v4	2026-10-10T21:38:13.9807514Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\My-Task-Up\My-Task-Up
+build	Run actions/checkout@v4	2026-10-10T21:38:14.0870838Z Deleting the contents of 'D:\a\My-Task-Up\My-Task-Up'
+build	Run actions/checkout@v4	2026-10-10T21:38:14.0877152Z ##[group]Initializing the repository
+build	Run actions/checkout@v4	2026-10-10T21:38:14.0885680Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\My-Task-Up\My-Task-Up
+build	Run actions/checkout@v4	2026-10-10T21:38:14.2471127Z Initialized empty Git repository in D:/a/My-Task-Up/My-Task-Up/.git/
+build	Run actions/checkout@v4	2026-10-10T21:38:14.2522625Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/zx4545zx/My-Task-Up
+build	Run actions/checkout@v4	2026-10-10T21:38:14.3517400Z ##[endgroup]
+build	Run actions/checkout@v4	2026-10-10T21:38:14.3518307Z ##[group]Disabling automatic garbage collection
+build	Run actions/checkout@v4	2026-10-10T21:38:14.3527230Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+build	Run actions/checkout@v4	2026-10-10T21:38:14.3847266Z ##[endgroup]
+build	Run actions/checkout@v4	2026-10-10T21:38:14.3848847Z ##[group]Setting up auth
+build	Run actions/checkout@v4	2026-10-10T21:38:14.3861146Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+build	Run actions/checkout@v4	2026-10-10T21:38:14.4200013Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+build	Run actions/checkout@v4	2026-10-10T21:38:16.9134118Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build	Run actions/checkout@v4	2026-10-10T21:38:16.9460193Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+build	Run actions/checkout@v4	2026-10-10T21:38:17.5209869Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+build	Run actions/checkout@v4	2026-10-10T21:38:17.5544510Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+build	Run actions/checkout@v4	2026-10-10T21:38:18.1481320Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+build	Run actions/checkout@v4	2026-10-10T21:38:18.1877592Z ##[endgroup]
+build	Run actions/checkout@v4	2026-10-10T21:38:18.1879151Z ##[group]Fetching the repository
+build	Run actions/checkout@v4	2026-10-10T21:38:18.1901906Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +85c3e63f54d5e1c7c11e548f15914a19f6575d08:refs/remotes/origin/feat/my-task-up-mvp
+build	Run actions/checkout@v4	2026-10-10T21:38:19.8413682Z From https://github.com/zx4545zx/My-Task-Up
+build	Run actions/checkout@v4	2026-10-10T21:38:19.8414700Z  * [new ref]         85c3e63f54d5e1c7c11e548f15914a19f6575d08 -> origin/feat/my-task-up-mvp
+build	Run actions/checkout@v4	2026-10-10T21:38:19.8463783Z ##[endgroup]
+build	Run actions/checkout@v4	2026-10-10T21:38:19.8464766Z ##[group]Determining the checkout info
+build	Run actions/checkout@v4	2026-10-10T21:38:19.8467165Z ##[endgroup]
+build	Run actions/checkout@v4	2026-10-10T21:38:19.8482725Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+build	Run actions/checkout@v4	2026-10-10T21:38:19.9196771Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+build	Run actions/checkout@v4	2026-10-10T21:38:19.9571608Z ##[group]Checking out the ref
+build	Run actions/checkout@v4	2026-10-10T21:38:19.9585571Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B feat/my-task-up-mvp refs/remotes/origin/feat/my-task-up-mvp
+build	Run actions/checkout@v4	2026-10-10T21:38:20.1055282Z Switched to a new branch 'feat/my-task-up-mvp'
+build	Run actions/checkout@v4	2026-10-10T21:38:20.1206762Z branch 'feat/my-task-up-mvp' set up to track 'origin/feat/my-task-up-mvp'.
+build	Run actions/checkout@v4	2026-10-10T21:38:20.1254382Z ##[endgroup]
+build	Run actions/checkout@v4	2026-10-10T21:38:20.1872263Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+build	Run actions/checkout@v4	2026-10-10T21:38:20.2180074Z 85c3e63f54d5e1c7c11e548f15914a19f6575d08
+build	Run subosito/flutter-action@v2	﻿2026-10-10T21:38:20.2776897Z ##[group]Run subosito/flutter-action@v2
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.2777284Z with:
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.2777466Z   channel: stable
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.2777674Z   flutter-version: 3.44.0
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.2777881Z   cache: true
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.2778053Z   architecture: X64
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.2778647Z   pub-cache-path: default
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.2778901Z   dry-run: false
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.2779211Z   git-source: https://github.com/flutter/flutter.git
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.2780320Z ##[endgroup]
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.2842226Z ##[start-action display=Make yq tool available on Windows runners;id=__subosito_flutter-action.__run]
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.2868219Z ##[end-action id=__subosito_flutter-action.__run;outcome=skipped;conclusion=skipped;duration_ms=0]
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.2870755Z ##[start-action display=Make setup script executable;id=__subosito_flutter-action.__run_2]
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.3039755Z ##[group]Run chmod +x "$GITHUB_ACTION_PATH/setup.sh"
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.3040197Z ^[[36;1mchmod +x "$GITHUB_ACTION_PATH/setup.sh"^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.3061365Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.3061799Z ##[endgroup]
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6199056Z ##[end-action id=__subosito_flutter-action.__run_2;outcome=success;conclusion=success;duration_ms=332]
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6201761Z ##[start-action display=Set action inputs;id=__subosito_flutter-action.flutter-action]
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6364162Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh -p \
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6364587Z ^[[36;1m$GITHUB_ACTION_PATH/setup.sh -p \^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6364876Z ^[[36;1m  -n '3.44.0' \^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6365079Z ^[[36;1m  -f '' \^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6365264Z ^[[36;1m  -a 'X64' \^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6365452Z ^[[36;1m  -k '' \^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6365627Z ^[[36;1m  -c '' \^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6365804Z ^[[36;1m  -l '' \^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6365991Z ^[[36;1m  -d 'default' \^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6366278Z ^[[36;1m  -g 'https://github.com/flutter/flutter.git' \^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6366597Z ^[[36;1m  stable^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6382882Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:20.6383294Z ##[endgroup]
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:24.3158457Z ##[end-action id=__subosito_flutter-action.flutter-action;outcome=success;conclusion=success;duration_ms=3695]
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:24.3163677Z ##[start-action display=Cache Flutter;id=__subosito_flutter-action.cache-flutter]
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:24.3355506Z ##[group]Run actions/cache@v5
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:24.3355763Z with:
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:24.3356012Z   path: C:\hostedtoolcache\windows\flutter\stable-3.44.0-x64
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:24.3356492Z   key: flutter-windows-stable-3.44.0-x64-559ffa3f75e7402d65a8def9c28389a9b2e6fe42
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:24.3356903Z   enableCrossOsArchive: false
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:24.3357130Z   fail-on-cache-miss: false
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:24.3357338Z   lookup-only: false
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:24.3357521Z   save-always: false
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:24.3357699Z ##[endgroup]
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:24.8224483Z Cache hit for: flutter-windows-stable-3.44.0-x64-559ffa3f75e7402d65a8def9c28389a9b2e6fe42
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:25.9551133Z Received 130023424 of 1891331304 (6.9%), 122.4 MBs/sec
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:26.9617833Z Received 264241152 of 1891331304 (14.0%), 124.8 MBs/sec
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:28.0244307Z Received 423624704 of 1891331304 (22.4%), 131.1 MBs/sec
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:29.0402241Z Received 595591168 of 1891331304 (31.5%), 138.6 MBs/sec
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:30.0565495Z Received 796917760 of 1891331304 (42.1%), 148.8 MBs/sec
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:31.0519160Z Received 939524096 of 1891331304 (49.7%), 146.6 MBs/sec
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:32.0715378Z Received 1115684864 of 1891331304 (59.0%), 149.4 MBs/sec
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:33.0711744Z Received 1333788672 of 1891331304 (70.5%), 156.6 MBs/sec
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:34.0665304Z Received 1476395008 of 1891331304 (78.1%), 154.3 MBs/sec
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:35.0699216Z Received 1652555776 of 1891331304 (87.4%), 155.6 MBs/sec
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:36.0800131Z Received 1862270976 of 1891331304 (98.5%), 159.5 MBs/sec
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:36.4368783Z Received 1891331304 of 1891331304 (100.0%), 156.9 MBs/sec
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:36.4379557Z Cache Size: ~1804 MB (1891331304 B)
+build	Run subosito/flutter-action@v2	2026-10-10T21:38:36.4473999Z [command]"C:\Program Files\Git\usr\bin\tar.exe" -xf D:/a/_temp/734be707-db1f-499a-b5f1-568997627be1/cache.tzst -P -C D:/a/My-Task-Up/My-Task-Up --force-local --use-compress-program "zstd -d"
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:30.8980751Z Cache restored successfully
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.0655255Z Cache restored from key: flutter-windows-stable-3.44.0-x64-559ffa3f75e7402d65a8def9c28389a9b2e6fe42
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.0808773Z ##[end-action id=__subosito_flutter-action.cache-flutter;outcome=success;conclusion=success;duration_ms=66764]
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.0811504Z ##[start-action display=Cache pub dependencies;id=__subosito_flutter-action.cache-pub]
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.2769162Z ##[group]Run actions/cache@v5
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.2769411Z with:
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.2769625Z   path: C:\Users\runneradmin\AppData\Local\Pub\Cache
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.2770434Z   key: flutter-pub-windows-stable-3.44.0-x64-559ffa3f75e7402d65a8def9c28389a9b2e6fe42-afc6e49a3ed8a84d13c167e70a9eb9262d44bfe210172ad7beef827c216b9e89
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.2771190Z   enableCrossOsArchive: false
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.2771801Z   fail-on-cache-miss: false
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.2772062Z   lookup-only: false
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.2772259Z   save-always: false
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.2772460Z ##[endgroup]
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.6566503Z Cache not found for input keys: flutter-pub-windows-stable-3.44.0-x64-559ffa3f75e7402d65a8def9c28389a9b2e6fe42-afc6e49a3ed8a84d13c167e70a9eb9262d44bfe210172ad7beef827c216b9e89
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.6678653Z ##[end-action id=__subosito_flutter-action.cache-pub;outcome=success;conclusion=success;duration_ms=586]
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.6681322Z ##[start-action display=Run setup script;id=__subosito_flutter-action.__run_3]
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.6841031Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh \
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.6841399Z ^[[36;1m$GITHUB_ACTION_PATH/setup.sh \^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.6841654Z ^[[36;1m  -n '3.44.0' \^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.6841863Z ^[[36;1m  -a 'x64' \^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.6842173Z ^[[36;1m  -c 'C:\hostedtoolcache\windows\flutter\stable-3.44.0-x64' \^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.6842592Z ^[[36;1m  -d 'C:\Users\runneradmin\AppData\Local\Pub\Cache' \^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.6842904Z ^[[36;1m  stable^[[0m
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.6858015Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:31.6858434Z ##[endgroup]
+build	Run subosito/flutter-action@v2	2026-10-10T21:39:34.3860685Z ##[end-action id=__subosito_flutter-action.__run_3;outcome=success;conclusion=success;duration_ms=2717]
+build	Run flutter pub get	﻿2026-10-10T21:39:34.4037738Z ##[group]Run flutter pub get
+build	Run flutter pub get	2026-10-10T21:39:34.4038091Z ^[[36;1mflutter pub get^[[0m
+build	Run flutter pub get	2026-10-10T21:39:34.4631753Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+build	Run flutter pub get	2026-10-10T21:39:34.4632128Z env:
+build	Run flutter pub get	2026-10-10T21:39:34.4632467Z   FLUTTER_ROOT: C:\hostedtoolcache\windows\flutter\stable-3.44.0-x64/flutter
+build	Run flutter pub get	2026-10-10T21:39:34.4632901Z   PUB_CACHE: C:\Users\runneradmin\AppData\Local\Pub\Cache
+build	Run flutter pub get	2026-10-10T21:39:34.4633195Z ##[endgroup]
+build	Run flutter pub get	2026-10-10T21:39:53.5788529Z Resolving dependencies...
+build	Run flutter pub get	2026-10-10T21:39:54.3254032Z Downloading packages...
+build	Run flutter pub get	2026-10-10T21:40:20.1706532Z   _fe_analyzer_shared 100.0.0 (109.0.0 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1709743Z   analyzer 13.0.0 (14.5.0 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1710246Z   build 4.0.7 (4.0.11 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1710729Z   build_runner 2.15.1 (2.16.2 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1711188Z   clock 1.1.2 (1.1.3 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1711598Z   code_assets 1.2.1 (2.1.0 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1712039Z   cupertino_ui 1.0.2 (1.1.2 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1712550Z   dart_style 3.1.9 (3.1.13 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1712980Z   dbus 0.7.15 (0.8.0 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1713375Z   hooks 2.0.2 (2.2.0 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1713769Z   intl 0.20.2 (0.20.3 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1714121Z   matcher 0.12.19 (0.12.20 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1714548Z   material_color_utilities 0.13.0 (0.13.1 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1715028Z   material_ui 1.2.0 (1.6.0 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1715412Z   meta 1.18.0 (1.19.0 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1715807Z   native_toolchain_c 0.19.2 (0.19.5 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1716260Z   objective_c 9.5.0 (9.6.2 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1716658Z   package_config 2.2.0 (3.0.0 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1717541Z   petitparser 7.0.2 (7.1.0 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1717960Z   record_use 0.6.0 (1.1.1 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1718356Z   source_gen 4.2.4 (4.3.0 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1718744Z   sqlite3 3.5.2 (3.7.0 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1719157Z   stack_trace 1.12.1 (1.12.2 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1719573Z   test_api 0.7.11 (0.7.15 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1719981Z   vector_math 2.2.0 (2.4.3 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1720385Z   xml 7.0.1 (7.1.0 available)
+build	Run flutter pub get	2026-10-10T21:40:20.1720780Z Got dependencies!
+build	Run flutter pub get	2026-10-10T21:40:20.1721327Z 26 packages have newer versions incompatible with dependency constraints.
+build	Run flutter pub get	2026-10-10T21:40:20.1722028Z Try `flutter pub outdated` for more information.
+build	Run dart format --output=none --set-exit-if-changed .	﻿2026-10-10T21:40:20.8150166Z ##[group]Run dart format --output=none --set-exit-if-changed .
+build	Run dart format --output=none --set-exit-if-changed .	2026-10-10T21:40:20.8151020Z ^[[36;1mdart format --output=none --set-exit-if-changed .^[[0m
+build	Run dart format --output=none --set-exit-if-changed .	2026-10-10T21:40:20.8231450Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+build	Run dart format --output=none --set-exit-if-changed .	2026-10-10T21:40:20.8231835Z env:
+build	Run dart format --output=none --set-exit-if-changed .	2026-10-10T21:40:20.8232130Z   FLUTTER_ROOT: C:\hostedtoolcache\windows\flutter\stable-3.44.0-x64/flutter
+build	Run dart format --output=none --set-exit-if-changed .	2026-10-10T21:40:20.8232554Z   PUB_CACHE: C:\Users\runneradmin\AppData\Local\Pub\Cache
+build	Run dart format --output=none --set-exit-if-changed .	2026-10-10T21:40:20.8232839Z ##[endgroup]
+build	Run dart format --output=none --set-exit-if-changed .	2026-10-10T21:40:21.4731083Z Formatted 39 files (0 changed) in 0.28 seconds.
+build	Run flutter analyze	﻿2026-10-10T21:40:21.6216554Z ##[group]Run flutter analyze
+build	Run flutter analyze	2026-10-10T21:40:21.6216913Z ^[[36;1mflutter analyze^[[0m
+build	Run flutter analyze	2026-10-10T21:40:21.6292226Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+build	Run flutter analyze	2026-10-10T21:40:21.6292592Z env:
+build	Run flutter analyze	2026-10-10T21:40:21.6292901Z   FLUTTER_ROOT: C:\hostedtoolcache\windows\flutter\stable-3.44.0-x64/flutter
+build	Run flutter analyze	2026-10-10T21:40:21.6293349Z   PUB_CACHE: C:\Users\runneradmin\AppData\Local\Pub\Cache
+build	Run flutter analyze	2026-10-10T21:40:21.6293646Z ##[endgroup]
+build	Run flutter analyze	2026-10-10T21:40:22.8949286Z Resolving dependencies...
+build	Run flutter analyze	2026-10-10T21:40:23.0592451Z Downloading packages...
+build	Run flutter analyze	2026-10-10T21:40:23.2246356Z   _fe_analyzer_shared 100.0.0 (109.0.0 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2246984Z   analyzer 13.0.0 (14.5.0 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2247356Z   build 4.0.7 (4.0.11 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2248205Z   build_runner 2.15.1 (2.16.2 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2248670Z   clock 1.1.2 (1.1.3 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2249076Z   code_assets 1.2.1 (2.1.0 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2249524Z   cupertino_ui 1.0.2 (1.1.2 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2250063Z   dart_style 3.1.9 (3.1.13 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2250506Z   dbus 0.7.15 (0.8.0 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2251198Z   hooks 2.0.2 (2.2.0 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2251600Z   intl 0.20.2 (0.20.3 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2251991Z   matcher 0.12.19 (0.12.20 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2252594Z   material_color_utilities 0.13.0 (0.13.1 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2253197Z   material_ui 1.2.0 (1.6.0 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2253717Z   meta 1.18.0 (1.19.0 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2254287Z   native_toolchain_c 0.19.2 (0.19.5 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2254832Z   objective_c 9.5.0 (9.6.2 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2255374Z   package_config 2.2.0 (3.0.0 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2255902Z   petitparser 7.0.2 (7.1.0 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2256525Z   record_use 0.6.0 (1.1.1 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2257078Z   source_gen 4.2.4 (4.3.0 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2257612Z   sqlite3 3.5.2 (3.7.0 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2258227Z   stack_trace 1.12.1 (1.12.2 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2258770Z   test_api 0.7.11 (0.7.15 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2335076Z   vector_math 2.2.0 (2.4.3 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2335709Z   xml 7.0.1 (7.1.0 available)
+build	Run flutter analyze	2026-10-10T21:40:23.2336090Z Got dependencies!
+build	Run flutter analyze	2026-10-10T21:40:23.2336637Z 26 packages have newer versions incompatible with dependency constraints.
+build	Run flutter analyze	2026-10-10T21:40:23.2337276Z Try `flutter pub outdated` for more information.
+build	Run flutter analyze	2026-10-10T21:40:42.7799422Z Analyzing My-Task-Up...                                         
+build	Run flutter analyze	2026-10-10T21:40:42.7829836Z No issues found! (ran in 18.3s)
+build	Run flutter test	﻿2026-10-10T21:40:42.9523819Z ##[group]Run flutter test
+build	Run flutter test	2026-10-10T21:40:42.9524318Z ^[[36;1mflutter test^[[0m
+build	Run flutter test	2026-10-10T21:40:42.9646679Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+build	Run flutter test	2026-10-10T21:40:42.9647243Z env:
+build	Run flutter test	2026-10-10T21:40:42.9647709Z   FLUTTER_ROOT: C:\hostedtoolcache\windows\flutter\stable-3.44.0-x64/flutter
+build	Run flutter test	2026-10-10T21:40:42.9648409Z   PUB_CACHE: C:\Users\runneradmin\AppData\Local\Pub\Cache
+build	Run flutter test	2026-10-10T21:40:42.9648872Z ##[endgroup]
+build	Run flutter test	2026-10-10T21:40:44.3528497Z Resolving dependencies...
+build	Run flutter test	2026-10-10T21:40:44.5434246Z Downloading packages...
+build	Run flutter test	2026-10-10T21:40:44.7002349Z   _fe_analyzer_shared 100.0.0 (109.0.0 available)
+build	Run flutter test	2026-10-10T21:40:44.7002964Z   analyzer 13.0.0 (14.5.0 available)
+build	Run flutter test	2026-10-10T21:40:44.7003370Z   build 4.0.7 (4.0.11 available)
+build	Run flutter test	2026-10-10T21:40:44.7004004Z   build_runner 2.15.1 (2.16.2 available)
+build	Run flutter test	2026-10-10T21:40:44.7004447Z   clock 1.1.2 (1.1.3 available)
+build	Run flutter test	2026-10-10T21:40:44.7004836Z   code_assets 1.2.1 (2.1.0 available)
+build	Run flutter test	2026-10-10T21:40:44.7005295Z   cupertino_ui 1.0.2 (1.1.2 available)
+build	Run flutter test	2026-10-10T21:40:44.7005767Z   dart_style 3.1.9 (3.1.13 available)
+build	Run flutter test	2026-10-10T21:40:44.7006168Z   dbus 0.7.15 (0.8.0 available)
+build	Run flutter test	2026-10-10T21:40:44.7006533Z   hooks 2.0.2 (2.2.0 available)
+build	Run flutter test	2026-10-10T21:40:44.7006904Z   intl 0.20.2 (0.20.3 available)
+build	Run flutter test	2026-10-10T21:40:44.7007284Z   matcher 0.12.19 (0.12.20 available)
+build	Run flutter test	2026-10-10T21:40:44.7007742Z   material_color_utilities 0.13.0 (0.13.1 available)
+build	Run flutter test	2026-10-10T21:40:44.7008223Z   material_ui 1.2.0 (1.6.0 available)
+build	Run flutter test	2026-10-10T21:40:44.7008621Z   meta 1.18.0 (1.19.0 available)
+build	Run flutter test	2026-10-10T21:40:44.7009019Z   native_toolchain_c 0.19.2 (0.19.5 available)
+build	Run flutter test	2026-10-10T21:40:44.7009475Z   objective_c 9.5.0 (9.6.2 available)
+build	Run flutter test	2026-10-10T21:40:44.7009898Z   package_config 2.2.0 (3.0.0 available)
+build	Run flutter test	2026-10-10T21:40:44.7010341Z   petitparser 7.0.2 (7.1.0 available)
+build	Run flutter test	2026-10-10T21:40:44.7010759Z   record_use 0.6.0 (1.1.1 available)
+build	Run flutter test	2026-10-10T21:40:44.7011170Z   source_gen 4.2.4 (4.3.0 available)
+build	Run flutter test	2026-10-10T21:40:44.7011579Z   sqlite3 3.5.2 (3.7.0 available)
+build	Run flutter test	2026-10-10T21:40:44.7011995Z   stack_trace 1.12.1 (1.12.2 available)
+build	Run flutter test	2026-10-10T21:40:44.7012406Z   test_api 0.7.11 (0.7.15 available)
+build	Run flutter test	2026-10-10T21:40:44.7012806Z   vector_math 2.2.0 (2.4.3 available)
+build	Run flutter test	2026-10-10T21:40:44.7013204Z   xml 7.0.1 (7.1.0 available)
+build	Run flutter test	2026-10-10T21:40:44.7013566Z Got dependencies!
+build	Run flutter test	2026-10-10T21:40:44.7014087Z 26 packages have newer versions incompatible with dependency constraints.
+build	Run flutter test	2026-10-10T21:40:44.7015046Z Try `flutter pub outdated` for more information.
+build	Run flutter test	2026-10-10T21:40:49.8103185Z 
+build	Run flutter test	2026-10-10T21:41:01.5231290Z ✅ D:/a/My-Task-Up/My-Task-Up/test/database_test.dart: seeds Inbox and default settings, then persists task data on reopen
+build	Run flutter test	2026-10-10T21:41:02.1768941Z ✅ D:/a/My-Task-Up/My-Task-Up/test/database_test.dart: rejects nested subtasks and invalid local values
+build	Run flutter test	2026-10-10T21:41:10.0173514Z ✅ D:/a/My-Task-Up/My-Task-Up/test/list_repository_test.dart: creates, renames, and explicitly reorders custom lists
+build	Run flutter test	2026-10-10T21:41:10.0635631Z ✅ D:/a/My-Task-Up/My-Task-Up/test/list_repository_test.dart: moving tasks to Inbox keeps subtasks and repairs default list
+build	Run flutter test	2026-10-10T21:41:10.0809190Z ✅ D:/a/My-Task-Up/My-Task-Up/test/list_repository_test.dart: deletes list tasks and protects Inbox
+build	Run flutter test	2026-10-10T21:41:11.5752263Z ✅ D:/a/My-Task-Up/My-Task-Up/test/list_navigation_test.dart: creates, renames, reorders, and deletes a custom list
+build	Run flutter test	2026-10-10T21:41:12.0433497Z ✅ D:/a/My-Task-Up/My-Task-Up/test/recurrence_test.dart: calculates built-in recurrence across calendar boundaries
+build	Run flutter test	2026-10-10T21:41:12.0464596Z ✅ D:/a/My-Task-Up/My-Task-Up/test/recurrence_test.dart: month-end and leap-day recurrences keep their original anchors
+build	Run flutter test	2026-10-10T21:41:12.0511524Z ✅ D:/a/My-Task-Up/My-Task-Up/test/recurrence_test.dart: custom weekly weekdays stay anchored to their original interval
+build	Run flutter test	2026-10-10T21:41:12.0551042Z ✅ D:/a/My-Task-Up/My-Task-Up/test/recurrence_test.dart: repeat codec retains calendar recurrence anchors
+build	Run flutter test	2026-10-10T21:41:12.0592260Z ✅ D:/a/My-Task-Up/My-Task-Up/test/recurrence_test.dart: custom repeat intervals stay within the supported calendar range
+build	Run flutter test	2026-10-10T21:41:12.0642699Z ✅ D:/a/My-Task-Up/My-Task-Up/test/recurrence_test.dart: repeat codec retains custom interval anchors
+build	Run flutter test	2026-10-10T21:41:14.0695939Z ✅ D:/a/My-Task-Up/My-Task-Up/test/reminder_coordinator_test.dart: reconciliation registers eligible tasks once and updates changed due
+build	Run flutter test	2026-10-10T21:41:14.1036750Z ✅ D:/a/My-Task-Up/My-Task-Up/test/reminder_coordinator_test.dart: completion and disabling cancel scheduled notifications
+build	Run flutter test	2026-10-10T21:41:14.1248549Z ✅ D:/a/My-Task-Up/My-Task-Up/test/reminder_coordinator_test.dart: failed cancellation remains pending and is retried
+build	Run flutter test	2026-10-10T21:41:14.1327727Z ✅ D:/a/My-Task-Up/My-Task-Up/test/reminder_coordinator_test.dart: permission denial keeps reminders disabled
+build	Run flutter test	2026-10-10T21:41:14.1485581Z ✅ D:/a/My-Task-Up/My-Task-Up/test/reminder_coordinator_test.dart: failed schedules remain pending and retry without duplicate ids
+build	Run flutter test	2026-10-10T21:41:14.1572008Z ✅ D:/a/My-Task-Up/My-Task-Up/test/reminder_coordinator_test.dart: reconcile errors roll back the enabled setting
+build	Run flutter test	2026-10-10T21:41:14.1734080Z ✅ D:/a/My-Task-Up/My-Task-Up/test/reminder_coordinator_test.dart: deletion cancels a scheduled notification
+build	Run flutter test	2026-10-10T21:41:14.1799872Z ✅ D:/a/My-Task-Up/My-Task-Up/test/reminder_coordinator_test.dart: unsupported platform refuses enable without changing settings
+build	Run flutter test	2026-10-10T21:41:17.7742590Z ✅ D:/a/My-Task-Up/My-Task-Up/test/task_query_test.dart: today filters by local calendar day and keeps completed tasks
+build	Run flutter test	2026-10-10T21:41:17.7972528Z ✅ D:/a/My-Task-Up/My-Task-Up/test/task_query_test.dart: upcoming excludes today and orders future calendar days
+build	Run flutter test	2026-10-10T21:41:18.6276740Z ✅ D:/a/My-Task-Up/My-Task-Up/test/task_flow_test.dart: quick add, edit details, create a subtask, complete and restore
+build	Run flutter test	2026-10-10T21:41:19.7587153Z ✅ D:/a/My-Task-Up/My-Task-Up/test/task_repository_test.dart: creates, edits, completes, restores, duplicates and deletes tasks
+build	Run flutter test	2026-10-10T21:41:19.7910942Z ✅ D:/a/My-Task-Up/My-Task-Up/test/task_repository_test.dart: completion atomically creates one anchored recurring occurrence
+build	Run flutter test	2026-10-10T21:41:19.8132995Z ✅ D:/a/My-Task-Up/My-Task-Up/test/task_repository_test.dart: monthly recurrence retains its original month-end day
+build	Run flutter test	2026-10-10T21:41:19.8340119Z ✅ D:/a/My-Task-Up/My-Task-Up/test/task_repository_test.dart: creates single-level subtasks and rejects nested subtasks
+build	Run flutter test	2026-10-10T21:41:19.8636275Z ✅ D:/a/My-Task-Up/My-Task-Up/test/task_repository_test.dart: reorders all and only the requested siblings
+build	Run flutter test	2026-10-10T21:41:19.8856367Z ✅ D:/a/My-Task-Up/My-Task-Up/test/task_repository_test.dart: moving a subtask moves its parent group together
+build	Run flutter test	2026-10-10T21:41:20.0336379Z ✅ D:/a/My-Task-Up/My-Task-Up/test/task_flow_test.dart: edits a local due date and recurrence
+build	Run flutter test	2026-10-10T21:41:23.9000205Z ✅ D:/a/My-Task-Up/My-Task-Up/test/widget_test.dart: navigation labels open their matching routes
+build	Run flutter test	2026-10-10T21:41:24.5593188Z ✅ D:/a/My-Task-Up/My-Task-Up/test/widget_test.dart: theme controls update the rendered theme mode
+build	Run flutter test	2026-10-10T21:41:24.7620322Z ✅ D:/a/My-Task-Up/My-Task-Up/test/widget_test.dart: mobile navigation renders at 390.0 pixels
+build	Run flutter test	2026-10-10T21:41:24.9455574Z ✅ D:/a/My-Task-Up/My-Task-Up/test/widget_test.dart: compact navigation renders at 900.0 pixels
+build	Run flutter test	2026-10-10T21:41:25.1316570Z ✅ D:/a/My-Task-Up/My-Task-Up/test/widget_test.dart: desktop navigation renders at 1400.0 pixels
+build	Run flutter test	2026-10-10T21:41:25.1687319Z 
+build	Run flutter test	2026-10-10T21:41:25.1694443Z 🎉 35 tests passed.
+build	Run flutter build windows --release	﻿2026-10-10T21:41:25.3816825Z ##[group]Run flutter build windows --release
+build	Run flutter build windows --release	2026-10-10T21:41:25.3817276Z ^[[36;1mflutter build windows --release^[[0m
+build	Run flutter build windows --release	2026-10-10T21:41:25.3894924Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+build	Run flutter build windows --release	2026-10-10T21:41:25.3895312Z env:
+build	Run flutter build windows --release	2026-10-10T21:41:25.3895622Z   FLUTTER_ROOT: C:\hostedtoolcache\windows\flutter\stable-3.44.0-x64/flutter
+build	Run flutter build windows --release	2026-10-10T21:41:25.3896061Z   PUB_CACHE: C:\Users\runneradmin\AppData\Local\Pub\Cache
+build	Run flutter build windows --release	2026-10-10T21:41:25.3896620Z ##[endgroup]
+build	Run flutter build windows --release	2026-10-10T21:41:26.6233233Z Resolving dependencies...
+build	Run flutter build windows --release	2026-10-10T21:41:26.7892946Z Downloading packages...
+build	Run flutter build windows --release	2026-10-10T21:41:26.9594178Z   _fe_analyzer_shared 100.0.0 (109.0.0 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9595015Z   analyzer 13.0.0 (14.5.0 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9595478Z   build 4.0.7 (4.0.11 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9595899Z   build_runner 2.15.1 (2.16.2 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9596346Z   clock 1.1.2 (1.1.3 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9596716Z   code_assets 1.2.1 (2.1.0 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9597181Z   cupertino_ui 1.0.2 (1.1.2 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9597571Z   dart_style 3.1.9 (3.1.13 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9597999Z   dbus 0.7.15 (0.8.0 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9598376Z   hooks 2.0.2 (2.2.0 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9598740Z   intl 0.20.2 (0.20.3 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9599099Z   matcher 0.12.19 (0.12.20 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9599516Z   material_color_utilities 0.13.0 (0.13.1 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9599998Z   material_ui 1.2.0 (1.6.0 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9600371Z   meta 1.18.0 (1.19.0 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9600761Z   native_toolchain_c 0.19.2 (0.19.5 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9601040Z   objective_c 9.5.0 (9.6.2 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9601304Z   package_config 2.2.0 (3.0.0 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9601558Z   petitparser 7.0.2 (7.1.0 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9601796Z   record_use 0.6.0 (1.1.1 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9602026Z   source_gen 4.2.4 (4.3.0 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9602290Z   sqlite3 3.5.2 (3.7.0 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9602527Z   stack_trace 1.12.1 (1.12.2 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9602770Z   test_api 0.7.11 (0.7.15 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9603004Z   vector_math 2.2.0 (2.4.3 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9603245Z   xml 7.0.1 (7.1.0 available)
+build	Run flutter build windows --release	2026-10-10T21:41:26.9603663Z Got dependencies!
+build	Run flutter build windows --release	2026-10-10T21:41:26.9604159Z 26 packages have newer versions incompatible with dependency constraints.
+build	Run flutter build windows --release	2026-10-10T21:41:26.9604656Z Try `flutter pub outdated` for more information.
+build	Run flutter build windows --release	2026-10-10T21:43:27.9922872Z Building Windows application...                                   120.4s
+build	Run flutter build windows --release	2026-10-10T21:43:27.9956060Z √ Built build\windows\x64\runner\Release\my_task_up.exe
+build	Run actions/upload-artifact@v4	﻿2026-10-10T21:43:28.1495252Z ##[group]Run actions/upload-artifact@v4
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.1495939Z with:
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.1496366Z   name: my-task-up-windows-release
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.1496960Z   path: build/windows/x64/runner/Release/
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.1497632Z   if-no-files-found: warn
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.1498109Z   compression-level: 6
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.1498596Z   overwrite: false
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.1499046Z   include-hidden-files: false
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.1499506Z env:
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.1500100Z   FLUTTER_ROOT: C:\hostedtoolcache\windows\flutter\stable-3.44.0-x64/flutter
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.1500981Z   PUB_CACHE: C:\Users\runneradmin\AppData\Local\Pub\Cache
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.1501639Z ##[endgroup]
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.3576651Z (node:208) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.3578002Z (Use `node --trace-deprecation ...` to show where the warning was created)
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.3749012Z With the provided path, there will be 17 files uploaded
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.3754884Z Artifact name is valid!
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.3756460Z Root directory input is valid!
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:28.6415039Z Beginning upload of artifact content to blob storage
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:29.4166524Z (node:208) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:29.8255608Z Uploaded bytes 8388608
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:30.1683575Z Uploaded bytes 14363748
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:30.1990580Z Finished uploading artifact content to blob storage!
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:30.1992484Z SHA256 digest of uploaded artifact zip is 0f84df32fbfbb60b2003140dd0b2db38e49f48ac8a25818bd0696ddda49ba4de
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:30.1995429Z Finalizing artifact upload
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:30.4090636Z Artifact my-task-up-windows-release.zip successfully finalized. Artifact ID 11683846055
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:30.4092020Z Artifact my-task-up-windows-release has been successfully uploaded! Final size is 14363748 bytes. Artifact ID is 11683846055
+build	Run actions/upload-artifact@v4	2026-10-10T21:43:30.4105737Z Artifact download URL: https://github.com/zx4545zx/My-Task-Up/actions/runs/38088373507/artifacts/11683846055
+build	Post Run subosito/flutter-action@v2	﻿2026-10-10T21:43:30.4602450Z Post job cleanup.
+build	Post Run subosito/flutter-action@v2	2026-10-10T21:43:30.4608072Z ##[start-action display=Cache pub dependencies;id=__907a83ab-6cce-47a8-a674-faab0e337aec.cache-pub]
+build	Post Run subosito/flutter-action@v2	2026-10-10T21:43:30.7947511Z Post job cleanup.
+build	Post Run subosito/flutter-action@v2	2026-10-10T21:43:31.0895093Z [command]"C:\Program Files\Git\usr\bin\tar.exe" --posix -cf cache.tzst --exclude cache.tzst -P -C D:/a/My-Task-Up/My-Task-Up --files-from manifest.txt --force-local --use-compress-program "zstd -T0"
+build	Post Run subosito/flutter-action@v2	2026-10-10T21:43:40.4076967Z Sent 74967833 of 74967833 (100.0%), 70.6 MBs/sec
+build	Post Run subosito/flutter-action@v2	2026-10-10T21:43:40.6868433Z Cache saved with key: flutter-pub-windows-stable-3.44.0-x64-559ffa3f75e7402d65a8def9c28389a9b2e6fe42-afc6e49a3ed8a84d13c167e70a9eb9262d44bfe210172ad7beef827c216b9e89
+build	Post Run subosito/flutter-action@v2	2026-10-10T21:43:40.6993024Z ##[end-action id=__907a83ab-6cce-47a8-a674-faab0e337aec.cache-pub;outcome=success;conclusion=success;duration_ms=10238]
+build	Post Run subosito/flutter-action@v2	2026-10-10T21:43:40.6995921Z ##[start-action display=Cache Flutter;id=__907a83ab-6cce-47a8-a674-faab0e337aec.cache-flutter]
+build	Post Run subosito/flutter-action@v2	2026-10-10T21:43:40.7220047Z Post job cleanup.
+build	Post Run subosito/flutter-action@v2	2026-10-10T21:43:40.9186550Z Cache hit occurred on the primary key flutter-windows-stable-3.44.0-x64-559ffa3f75e7402d65a8def9c28389a9b2e6fe42, not saving cache.
+build	Post Run subosito/flutter-action@v2	2026-10-10T21:43:40.9288804Z ##[end-action id=__907a83ab-6cce-47a8-a674-faab0e337aec.cache-flutter;outcome=success;conclusion=success;duration_ms=229]
+build	Post Run actions/checkout@v4	﻿2026-10-10T21:43:40.9485893Z Post job cleanup.
+build	Post Run actions/checkout@v4	2026-10-10T21:43:41.1491977Z [command]"C:\Program Files\Git\bin\git.exe" version
+build	Post Run actions/checkout@v4	2026-10-10T21:43:41.1839133Z git version 2.55.0.windows.5
+build	Post Run actions/checkout@v4	2026-10-10T21:43:41.1908512Z Temporarily overriding HOME='D:\a\_temp\d6599f8b-f764-44f6-b255-38a2c6cf2c80' before making global git config changes
+build	Post Run actions/checkout@v4	2026-10-10T21:43:41.1909801Z Adding repository directory to the temporary git global config as a safe directory
+build	Post Run actions/checkout@v4	2026-10-10T21:43:41.1920944Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\My-Task-Up\My-Task-Up
+build	Post Run actions/checkout@v4	2026-10-10T21:43:41.2241831Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+build	Post Run actions/checkout@v4	2026-10-10T21:43:41.2623377Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+build	Post Run actions/checkout@v4	2026-10-10T21:43:41.8875438Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build	Post Run actions/checkout@v4	2026-10-10T21:43:41.9157168Z http.https://github.com/.extraheader
+build	Post Run actions/checkout@v4	2026-10-10T21:43:41.9199269Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+build	Post Run actions/checkout@v4	2026-10-10T21:43:41.9520997Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+build	Post Run actions/checkout@v4	2026-10-10T21:43:42.5028662Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+build	Post Run actions/checkout@v4	2026-10-10T21:43:42.5345283Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+build	Complete job	﻿2026-10-10T21:43:43.1149929Z Cleaning up orphan processes
+build	Complete job	2026-10-10T21:43:43.1355521Z Terminate orphan process: pid (7576) (vctip)
+build	Complete job	2026-10-10T21:43:43.1378782Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
