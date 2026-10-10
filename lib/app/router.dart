@@ -17,10 +17,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: ShellDestination.inbox.path,
-            builder: (context, state) => const PlaceholderPage(
-              title: 'Inbox',
-              message: 'Your inbox is ready.',
-            ),
+            builder: (context, state) => TaskListPage(listId: ListId.inbox),
           ),
           GoRoute(
             path: ShellDestination.today.path,

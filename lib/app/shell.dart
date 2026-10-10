@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/lists/list_navigation.dart';
 import '../features/navigation/shell_destination.dart';
+import '../features/tasks/task_detail_panel.dart';
 
 class AppShell extends ConsumerWidget {
   const AppShell({required this.location, required this.child, super.key});
@@ -85,21 +86,7 @@ class AppShell extends ConsumerWidget {
                 width: 320,
                 child: ColoredBox(
                   color: Theme.of(context).colorScheme.surfaceContainerLow,
-                  child: const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.checklist, size: 32),
-                          SizedBox(height: 12),
-                          Text('Task details'),
-                          SizedBox(height: 8),
-                          Text('Select a task to see its details.'),
-                        ],
-                      ),
-                    ),
-                  ),
+                  child: const TaskDetailPanel(),
                 ),
               ),
             ],

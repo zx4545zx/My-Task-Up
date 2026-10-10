@@ -10,7 +10,7 @@ void main() {
   testWidgets('navigation labels open their matching routes', (tester) async {
     await _pumpApp(tester, 390);
 
-    expect(find.text('Your inbox is ready.'), findsOneWidget);
+    expect(find.text('Inbox'), findsWidgets);
     await tester.tap(find.text('Today').first);
     await tester.pumpAndSettle();
     expect(find.text('Tasks due today will appear here.'), findsOneWidget);
@@ -25,7 +25,7 @@ void main() {
 
     await tester.tap(find.text('Inbox').first);
     await tester.pumpAndSettle();
-    expect(find.text('Your inbox is ready.'), findsOneWidget);
+    expect(find.text('Inbox'), findsWidgets);
   });
 
   testWidgets('theme controls update the rendered theme mode', (tester) async {

@@ -30,7 +30,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Add list'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Errands');
+    await tester.enterText(find.byType(TextField).last, 'Errands');
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     expect(find.text('Errands'), findsOneWidget);
@@ -41,7 +41,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Rename'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Personal');
+    await tester.enterText(find.byType(TextField).last, 'Personal');
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     expect(find.text('Personal'), findsNWidgets(2));
@@ -49,7 +49,7 @@ void main() {
 
     await tester.tap(find.text('Add list'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Work');
+    await tester.enterText(find.byType(TextField).last, 'Work');
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     final customLists = (await ListRepository(
