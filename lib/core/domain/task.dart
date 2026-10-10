@@ -29,6 +29,12 @@ final class LocalDue {
   final int day;
   final int? minute;
 
+  factory LocalDue.fromDayKey(int dayKey) => LocalDue(
+    year: dayKey ~/ 10000,
+    month: (dayKey ~/ 100) % 100,
+    day: dayKey % 100,
+  );
+
   int get dayKey => year * 10000 + month * 100 + day;
 }
 
@@ -57,11 +63,15 @@ final class WeeklyRepeat extends RepeatRule {
 }
 
 final class MonthlyRepeat extends RepeatRule {
-  const MonthlyRepeat();
+  const MonthlyRepeat({this.anchorDayKey});
+
+  final int? anchorDayKey;
 }
 
 final class YearlyRepeat extends RepeatRule {
-  const YearlyRepeat();
+  const YearlyRepeat({this.anchorDayKey});
+
+  final int? anchorDayKey;
 }
 
 final class CustomRepeat extends RepeatRule {
@@ -69,16 +79,26 @@ final class CustomRepeat extends RepeatRule {
     required this.interval,
     required this.every,
     this.weekdays = const {},
+    this.anchorDayKey,
   }) {
-    if (every < 1) throw ArgumentError.value(every, 'every');
+    if (every < 1 || every > 9999) {
+      throw ArgumentError.value(every, 'every');
+    }
     if (weekdays.isNotEmpty && interval != RepeatInterval.weeks) {
       throw ArgumentError.value(weekdays, 'weekdays');
+    }
+    if (anchorDayKey case final dayKey?) {
+      if (interval != RepeatInterval.weeks || weekdays.isEmpty) {
+        throw ArgumentError.value(dayKey, 'anchorDayKey');
+      }
+      LocalDue.fromDayKey(dayKey);
     }
   }
 
   final RepeatInterval interval;
   final int every;
   final Set<Weekday> weekdays;
+  final int? anchorDayKey;
 }
 
 final class Task {

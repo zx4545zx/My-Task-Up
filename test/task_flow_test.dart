@@ -5,6 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:my_task_up/app/app.dart';
 import 'package:my_task_up/core/database/app_database.dart';
 import 'package:my_task_up/core/database/database_provider.dart';
+import 'package:my_task_up/core/domain/ids.dart';
+import 'package:my_task_up/core/domain/task.dart';
+import 'package:my_task_up/features/tasks/task_repository.dart';
 
 void main() {
   testWidgets(
@@ -50,6 +53,7 @@ void main() {
             widget is TextField &&
             widget.decoration?.hintText == 'Add a subtask',
       );
+      await tester.ensureVisible(addSubtask);
       await tester.enterText(addSubtask, 'Pick up package');
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await _pumpAsync(tester);
@@ -63,6 +67,58 @@ void main() {
       expect(find.text('Complete task'), findsOneWidget);
     },
   );
+
+  testWidgets('edits a local due date and recurrence', (tester) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 900);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWithValue(database)],
+        child: const MyTaskUpApp(),
+      ),
+    );
+    await _pumpAsync(tester);
+    await tester.enterText(find.byType(TextField).first, 'Pay rent');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await _pumpAsync(tester);
+    await tester.tap(find.text('Pay rent'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit'));
+    await tester.pumpAndSettle();
+
+    final tomorrow = DateTime.now().add(const Duration(days: 1));
+    await tester.tap(find.byTooltip('Choose due date'));
+    await tester.pumpAndSettle();
+    if (tomorrow.month != DateTime.now().month) {
+      await tester.tap(find.byTooltip('Next month'));
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.text('${tomorrow.day}').last);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    final repeatField = find.byType(DropdownButtonFormField<String>);
+    await tester.ensureVisible(repeatField);
+    await tester.tap(repeatField);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Daily').last);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Save'));
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    await _pumpAsync(tester);
+
+    final task = (await TaskRepository(database).forList(ListId.inbox)).single;
+    expect(
+      task.due?.dayKey,
+      tomorrow.year * 10000 + tomorrow.month * 100 + tomorrow.day,
+    );
+    expect(task.repeat, isA<DailyRepeat>());
+  });
 }
 
 Future<void> _pumpAsync(WidgetTester tester) async {

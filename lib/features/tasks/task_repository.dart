@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../core/database/app_database.dart';
 import '../../core/database/repeat_rule_codec.dart';
 import '../../core/domain/ids.dart';
+import '../../core/domain/recurrence.dart';
 import '../../core/domain/task.dart';
 
 final class TaskRepository {
@@ -205,6 +206,8 @@ final class TaskRepository {
     TaskId id, {
     required String title,
     required String? notes,
+    required LocalDue? due,
+    required RepeatRule repeat,
   }) async {
     final existing = await get(id);
     if (existing == null) throw StateError('Task does not exist.');
@@ -214,8 +217,8 @@ final class TaskRepository {
       parentId: existing.parentId,
       title: TaskTitle(title),
       notes: notes,
-      due: existing.due,
-      repeat: existing.repeat,
+      due: due,
+      repeat: repeat,
       position: existing.position,
       createdAt: existing.createdAt,
       updatedAt: DateTime.now(),
@@ -225,7 +228,10 @@ final class TaskRepository {
     return updated;
   }
 
-  Future<Task> complete(TaskId id, {required DateTime at}) async {
+  Future<Task> complete(
+    TaskId id, {
+    required DateTime at,
+  }) => database.transaction(() async {
     final existing = await get(id);
     if (existing == null) throw StateError('Task does not exist.');
     if (existing.isCompleted) return existing;
@@ -242,9 +248,62 @@ final class TaskRepository {
       updatedAt: at,
       completedAt: at,
     );
-    await save(updated);
+    await _save(updated);
+
+    if (existing.due case final due?) {
+      final nextDate = nextDue(due, existing.repeat, anchorDayKey: due.dayKey);
+      if (nextDate != null) {
+        final siblings =
+            await (database.select(database.tasks)
+                  ..where(
+                    (task) =>
+                        task.listId.equals(existing.listId.value) &
+                        (existing.parentId == null
+                            ? task.parentId.isNull()
+                            : task.parentId.equals(existing.parentId!.value)),
+                  )
+                  ..orderBy([(task) => OrderingTerm.desc(task.position)])
+                  ..limit(1))
+                .getSingleOrNull();
+        final repeat = switch (existing.repeat) {
+          CustomRepeat(
+            interval: RepeatInterval.weeks,
+            :final every,
+            :final weekdays,
+            anchorDayKey: null,
+          )
+              when weekdays.isNotEmpty =>
+            CustomRepeat(
+              interval: RepeatInterval.weeks,
+              every: every,
+              weekdays: weekdays,
+              anchorDayKey: due.dayKey,
+            ),
+          MonthlyRepeat(anchorDayKey: null) => MonthlyRepeat(
+            anchorDayKey: due.dayKey,
+          ),
+          YearlyRepeat(anchorDayKey: null) => YearlyRepeat(
+            anchorDayKey: due.dayKey,
+          ),
+          _ => existing.repeat,
+        };
+        final occurrence = Task(
+          id: TaskId.newId(),
+          listId: existing.listId,
+          parentId: existing.parentId,
+          title: existing.title,
+          notes: existing.notes,
+          due: nextDate,
+          repeat: repeat,
+          position: (siblings?.position ?? -1) + 1,
+          createdAt: at,
+          updatedAt: at,
+        );
+        await _save(occurrence);
+      }
+    }
     return updated;
-  }
+  });
 
   Future<Task> restore(TaskId id, {required DateTime at}) async {
     final existing = await get(id);
@@ -298,11 +357,29 @@ final class TaskRepository {
     return copy;
   }
 
-  Future<void> save(Task task) => database.transaction(() async {
+  Future<void> save(Task task) => database.transaction(() => _save(task));
+
+  Future<void> _save(Task task) async {
     final listExists = await (database.select(
       database.taskLists,
     )..where((list) => list.id.equals(task.listId.value))).getSingleOrNull();
     if (listExists == null) throw StateError('Task list does not exist.');
+    if (task.repeat is! NeverRepeat && task.due == null) {
+      throw StateError('Recurring tasks require a due date.');
+    }
+    final anchorDayKey = switch (task.repeat) {
+      CustomRepeat(:final anchorDayKey) => anchorDayKey,
+      MonthlyRepeat(:final anchorDayKey) => anchorDayKey,
+      YearlyRepeat(:final anchorDayKey) => anchorDayKey,
+      _ => null,
+    };
+    if (anchorDayKey != null) {
+      try {
+        LocalDue.fromDayKey(anchorDayKey);
+      } on ArgumentError {
+        throw StateError('Recurrence anchor is not a valid date.');
+      }
+    }
 
     if (task.parentId case final parentId?) {
       final parent = await (database.select(
@@ -347,7 +424,7 @@ final class TaskRepository {
             completedAt: Value(task.completedAt?.millisecondsSinceEpoch),
           ),
         );
-  });
+  }
 
   Future<void> delete(TaskId id) => database.transaction(() async {
     await (database.delete(

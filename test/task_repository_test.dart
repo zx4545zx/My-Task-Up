@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_task_up/core/database/app_database.dart';
 import 'package:my_task_up/core/domain/ids.dart';
+import 'package:my_task_up/core/domain/task.dart';
 import 'package:my_task_up/features/lists/list_repository.dart';
 import 'package:my_task_up/features/tasks/task_repository.dart';
 
@@ -28,6 +29,8 @@ void main() {
         task.id,
         title: 'Release notes',
         notes: 'Summarize changes',
+        due: null,
+        repeat: const NeverRepeat(),
       );
       expect(edited.title.value, 'Release notes');
       expect(edited.notes, 'Summarize changes');
@@ -60,6 +63,69 @@ void main() {
       expect(await tasks.get(duplicate.id), isNotNull);
     },
   );
+
+  test(
+    'completion atomically creates one anchored recurring occurrence',
+    () async {
+      final task = await tasks.create(title: 'Water plants');
+      final due = LocalDue(year: 2026, month: 10, day: 5, minute: 540);
+      final recurring = Task(
+        id: task.id,
+        listId: task.listId,
+        title: task.title,
+        repeat: CustomRepeat(
+          interval: RepeatInterval.weeks,
+          every: 2,
+          weekdays: {Weekday.monday, Weekday.wednesday},
+        ),
+        position: task.position,
+        createdAt: task.createdAt,
+        updatedAt: task.updatedAt,
+        due: due,
+      );
+      await tasks.save(recurring);
+
+      await tasks.complete(task.id, at: DateTime(2026, 10, 5, 9));
+      await tasks.complete(task.id, at: DateTime(2026, 10, 5, 10));
+      var occurrences = await tasks.forList(ListId.inbox);
+      expect(occurrences, hasLength(2));
+      expect(occurrences[0].isCompleted, isTrue);
+      expect(occurrences[1].due?.dayKey, 20261007);
+      expect(occurrences[1].due?.minute, 540);
+      expect((occurrences[1].repeat as CustomRepeat).anchorDayKey, 20261005);
+
+      await tasks.complete(occurrences[1].id, at: DateTime(2026, 10, 7, 9));
+      occurrences = await tasks.forList(ListId.inbox);
+      expect(occurrences, hasLength(3));
+      expect(occurrences[2].due?.dayKey, 20261019);
+      expect(occurrences[2].isCompleted, isFalse);
+    },
+  );
+
+  test('monthly recurrence retains its original month-end day', () async {
+    final task = await tasks.create(title: 'Pay rent');
+    await tasks.save(
+      Task(
+        id: task.id,
+        listId: task.listId,
+        title: task.title,
+        repeat: const MonthlyRepeat(),
+        position: task.position,
+        createdAt: task.createdAt,
+        updatedAt: task.updatedAt,
+        due: LocalDue(year: 2026, month: 1, day: 31),
+      ),
+    );
+
+    await tasks.complete(task.id, at: DateTime(2026, 1, 31));
+    var occurrences = await tasks.forList(ListId.inbox);
+    expect(occurrences[1].due?.dayKey, 20260228);
+    expect((occurrences[1].repeat as MonthlyRepeat).anchorDayKey, 20260131);
+
+    await tasks.complete(occurrences[1].id, at: DateTime(2026, 2, 28));
+    occurrences = await tasks.forList(ListId.inbox);
+    expect(occurrences[2].due?.dayKey, 20260331);
+  });
 
   test('creates single-level subtasks and rejects nested subtasks', () async {
     final parent = await tasks.create(title: 'Plan trip');

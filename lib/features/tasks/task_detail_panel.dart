@@ -97,7 +97,18 @@ class _TaskDetailsContent extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
         Text(task.notes?.isNotEmpty == true ? task.notes! : 'No notes.'),
-        const SizedBox(height: 24),
+        const SizedBox(height: 12),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Due'),
+          subtitle: Text(_dueLabel(context)),
+        ),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Repeat'),
+          subtitle: Text(_repeatLabel(task.repeat)),
+        ),
+        const SizedBox(height: 12),
         FilledButton.tonalIcon(
           onPressed: () => _editTask(context, ref),
           icon: const Icon(Icons.edit_outlined),
@@ -197,7 +208,13 @@ class _TaskDetailsContent extends ConsumerWidget {
     try {
       await ref
           .read(taskRepositoryProvider)
-          .edit(task.id, title: changes.title, notes: changes.notes);
+          .edit(
+            task.id,
+            title: changes.title,
+            notes: changes.notes,
+            due: changes.due,
+            repeat: changes.repeat,
+          );
       _refresh(ref);
     } catch (error) {
       debugPrint('Could not edit task: $error');
@@ -228,6 +245,8 @@ class _TaskDetailsContent extends ConsumerWidget {
     try {
       await ref.read(taskRepositoryProvider).createSubtask(task.id, title);
       ref.invalidate(subtasksProvider(task.id));
+      ref.invalidate(todayTasksProvider);
+      ref.invalidate(upcomingTasksProvider);
     } catch (error) {
       debugPrint('Could not create subtask: $error');
       if (context.mounted) _showError(context, 'Could not create the subtask.');
@@ -248,6 +267,8 @@ class _TaskDetailsContent extends ConsumerWidget {
       }
       ref.invalidate(subtasksProvider(task.id));
       ref.invalidate(taskProvider(subtask.id));
+      ref.invalidate(todayTasksProvider);
+      ref.invalidate(upcomingTasksProvider);
     } catch (error) {
       debugPrint('Could not update subtask: $error');
       if (context.mounted) _showError(context, 'Could not update the subtask.');
@@ -306,6 +327,8 @@ class _TaskDetailsContent extends ConsumerWidget {
       ref.invalidate(tasksForListProvider(destination));
       ref.invalidate(subtasksProvider(task.parentId ?? task.id));
       ref.invalidate(taskProvider(task.id));
+      ref.invalidate(todayTasksProvider);
+      ref.invalidate(upcomingTasksProvider);
     } catch (error) {
       debugPrint('Could not move task: $error');
       if (context.mounted) _showError(context, 'Could not move the task.');
@@ -319,6 +342,8 @@ class _TaskDetailsContent extends ConsumerWidget {
           .duplicate(task.id);
       ref.invalidate(tasksForListProvider(task.listId));
       ref.invalidate(subtasksProvider(task.parentId ?? task.id));
+      ref.invalidate(todayTasksProvider);
+      ref.invalidate(upcomingTasksProvider);
       ref.read(selectedTaskIdProvider.notifier).select(duplicate.id);
       if (showCloseButton && context.mounted) Navigator.pop(context);
     } catch (error) {
@@ -350,6 +375,8 @@ class _TaskDetailsContent extends ConsumerWidget {
       await ref.read(taskRepositoryProvider).delete(task.id);
       ref.invalidate(tasksForListProvider(task.listId));
       ref.invalidate(subtasksProvider(task.parentId ?? task.id));
+      ref.invalidate(todayTasksProvider);
+      ref.invalidate(upcomingTasksProvider);
       ref.read(selectedTaskIdProvider.notifier).select(null);
       if (showCloseButton && context.mounted) Navigator.pop(context);
     } catch (error) {
@@ -362,7 +389,44 @@ class _TaskDetailsContent extends ConsumerWidget {
     ref.invalidate(taskProvider(task.id));
     ref.invalidate(tasksForListProvider(task.listId));
     ref.invalidate(subtasksProvider(task.parentId ?? task.id));
+    ref.invalidate(todayTasksProvider);
+    ref.invalidate(upcomingTasksProvider);
   }
+
+  String _dueLabel(BuildContext context) {
+    final due = task.due;
+    if (due == null) return 'No due date';
+    final localizations = MaterialLocalizations.of(context);
+    final date = localizations.formatMediumDate(
+      DateTime(due.year, due.month, due.day),
+    );
+    if (due.minute == null) return '$date · All day';
+    final time = localizations.formatTimeOfDay(
+      TimeOfDay(hour: due.minute! ~/ 60, minute: due.minute! % 60),
+    );
+    return '$date · $time';
+  }
+
+  String _repeatLabel(RepeatRule repeat) => switch (repeat) {
+    NeverRepeat() => 'Never',
+    DailyRepeat() => 'Daily',
+    WeekdaysRepeat() => 'Every weekday',
+    WeeklyRepeat() => 'Weekly',
+    MonthlyRepeat() => 'Monthly',
+    YearlyRepeat() => 'Yearly',
+    CustomRepeat(:final interval, :final every, :final weekdays) =>
+      'Every $every ${interval.name}${weekdays.isEmpty ? '' : ' on ${weekdays.map(_weekdayLabel).join(', ')}'}',
+  };
+
+  String _weekdayLabel(Weekday weekday) => switch (weekday) {
+    Weekday.monday => 'Mon',
+    Weekday.tuesday => 'Tue',
+    Weekday.wednesday => 'Wed',
+    Weekday.thursday => 'Thu',
+    Weekday.friday => 'Fri',
+    Weekday.saturday => 'Sat',
+    Weekday.sunday => 'Sun',
+  };
 
   void _showError(BuildContext context, String message) {
     ScaffoldMessenger.of(
@@ -408,10 +472,17 @@ class _AddSubtaskFieldState extends State<_AddSubtaskField> {
 }
 
 class _TaskDetailsInput {
-  const _TaskDetailsInput({required this.title, required this.notes});
+  const _TaskDetailsInput({
+    required this.title,
+    required this.notes,
+    required this.due,
+    required this.repeat,
+  });
 
   final String title;
   final String? notes;
+  final LocalDue? due;
+  final RepeatRule repeat;
 }
 
 class _TaskDetailsDialog extends StatefulWidget {
@@ -426,63 +497,341 @@ class _TaskDetailsDialog extends StatefulWidget {
 class _TaskDetailsDialogState extends State<_TaskDetailsDialog> {
   late final TextEditingController titleController;
   late final TextEditingController notesController;
+  late final TextEditingController everyController;
+  late LocalDue? due;
+  late String repeatType;
+  late RepeatInterval interval;
+  late Set<Weekday> weekdays;
+  int? repeatAnchorDayKey;
+  bool repeatChanged = false;
+  bool dueError = false;
+  bool recurrenceError = false;
 
   @override
   void initState() {
     super.initState();
     titleController = TextEditingController(text: widget.task.title.value);
     notesController = TextEditingController(text: widget.task.notes ?? '');
+    due = widget.task.due;
+    final repeat = widget.task.repeat;
+    repeatType = switch (repeat) {
+      NeverRepeat() => 'never',
+      DailyRepeat() => 'daily',
+      WeekdaysRepeat() => 'weekdays',
+      WeeklyRepeat() => 'weekly',
+      MonthlyRepeat() => 'monthly',
+      YearlyRepeat() => 'yearly',
+      CustomRepeat() => 'custom',
+    };
+    interval = repeat is CustomRepeat ? repeat.interval : RepeatInterval.days;
+    everyController = TextEditingController(
+      text: repeat is CustomRepeat ? '${repeat.every}' : '1',
+    );
+    weekdays = repeat is CustomRepeat ? {...repeat.weekdays} : {};
+    repeatAnchorDayKey = switch (repeat) {
+      CustomRepeat(:final anchorDayKey) => anchorDayKey,
+      MonthlyRepeat(:final anchorDayKey) => anchorDayKey,
+      YearlyRepeat(:final anchorDayKey) => anchorDayKey,
+      _ => null,
+    };
   }
 
   @override
   void dispose() {
     titleController.dispose();
     notesController.dispose();
+    everyController.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) => AlertDialog(
-    title: const Text('Edit task'),
-    content: SizedBox(
-      width: 440,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: titleController,
-            autofocus: true,
-            decoration: const InputDecoration(labelText: 'Title'),
-          ),
-          TextField(
-            controller: notesController,
-            minLines: 2,
-            maxLines: 5,
-            decoration: const InputDecoration(labelText: 'Notes'),
-          ),
-        ],
-      ),
+  Future<void> _chooseDate() async {
+    final today = DateTime.now();
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: due == null
+          ? today
+          : DateTime(due!.year, due!.month, due!.day),
+      firstDate: DateTime(100),
+      lastDate: DateTime(9999, 12, 31),
+    );
+    if (selected == null) return;
+    setState(() {
+      due = LocalDue(
+        year: selected.year,
+        month: selected.month,
+        day: selected.day,
+        minute: due?.minute,
+      );
+      repeatChanged = true;
+      dueError = false;
+    });
+  }
+
+  Future<void> _chooseTime() async {
+    final selected = await showTimePicker(
+      context: context,
+      initialTime: due?.minute == null
+          ? const TimeOfDay(hour: 9, minute: 0)
+          : TimeOfDay(hour: due!.minute! ~/ 60, minute: due!.minute! % 60),
+    );
+    if (selected == null || due == null) return;
+    setState(() {
+      due = LocalDue(
+        year: due!.year,
+        month: due!.month,
+        day: due!.day,
+        minute: selected.hour * 60 + selected.minute,
+      );
+    });
+  }
+
+  RepeatRule _repeatRule() => switch (repeatType) {
+    'daily' => const DailyRepeat(),
+    'weekdays' => const WeekdaysRepeat(),
+    'weekly' => const WeeklyRepeat(),
+    'monthly' => MonthlyRepeat(
+      anchorDayKey: repeatChanged ? due?.dayKey : repeatAnchorDayKey,
     ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context),
-        child: const Text('Cancel'),
+    'yearly' => YearlyRepeat(
+      anchorDayKey: repeatChanged ? due?.dayKey : repeatAnchorDayKey,
+    ),
+    'custom' => CustomRepeat(
+      interval: interval,
+      every: int.parse(everyController.text),
+      weekdays: interval == RepeatInterval.weeks ? weekdays : const {},
+      anchorDayKey: interval == RepeatInterval.weeks && weekdays.isNotEmpty
+          ? (repeatChanged ? due?.dayKey : repeatAnchorDayKey)
+          : null,
+    ),
+    _ => const NeverRepeat(),
+  };
+
+  void _save() {
+    final title = titleController.text.trim();
+    final every = int.tryParse(everyController.text);
+    if (title.isEmpty || (repeatType != 'never' && due == null)) {
+      setState(() => dueError = due == null && repeatType != 'never');
+      return;
+    }
+    if (repeatType == 'custom' &&
+        (every == null || every < 1 || every > 9999)) {
+      setState(() => recurrenceError = true);
+      return;
+    }
+    final notes = notesController.text.trim();
+    Navigator.pop(
+      context,
+      _TaskDetailsInput(
+        title: title,
+        notes: notes.isEmpty ? null : notes,
+        due: due,
+        repeat: _repeatRule(),
       ),
-      FilledButton(
-        onPressed: () {
-          final title = titleController.text.trim();
-          if (title.isEmpty) return;
-          final notes = notesController.text.trim();
-          Navigator.pop(
-            context,
-            _TaskDetailsInput(
-              title: title,
-              notes: notes.isEmpty ? null : notes,
-            ),
-          );
-        },
-        child: const Text('Save'),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = MaterialLocalizations.of(context);
+    return AlertDialog(
+      title: const Text('Edit task'),
+      content: SizedBox(
+        width: 440,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                autofocus: true,
+                decoration: const InputDecoration(labelText: 'Title'),
+              ),
+              TextField(
+                controller: notesController,
+                minLines: 2,
+                maxLines: 5,
+                decoration: const InputDecoration(labelText: 'Notes'),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.calendar_today_outlined),
+                title: const Text('Due date'),
+                subtitle: Text(
+                  due == null
+                      ? 'No date'
+                      : localizations.formatMediumDate(
+                          DateTime(due!.year, due!.month, due!.day),
+                        ),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      tooltip: 'Choose due date',
+                      onPressed: _chooseDate,
+                      icon: const Icon(Icons.edit_calendar_outlined),
+                    ),
+                    if (due != null)
+                      IconButton(
+                        tooltip: 'Clear due date',
+                        onPressed: () => setState(() {
+                          due = null;
+                          repeatChanged = true;
+                          dueError = false;
+                        }),
+                        icon: const Icon(Icons.clear),
+                      ),
+                  ],
+                ),
+              ),
+              if (dueError)
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Choose a due date for recurring tasks.'),
+                ),
+              if (due != null)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.schedule_outlined),
+                  title: const Text('Due time'),
+                  subtitle: Text(
+                    due!.minute == null
+                        ? 'All day'
+                        : localizations.formatTimeOfDay(
+                            TimeOfDay(
+                              hour: due!.minute! ~/ 60,
+                              minute: due!.minute! % 60,
+                            ),
+                          ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        tooltip: 'Choose due time',
+                        onPressed: _chooseTime,
+                        icon: const Icon(Icons.edit_outlined),
+                      ),
+                      if (due!.minute != null)
+                        IconButton(
+                          tooltip: 'Clear due time',
+                          onPressed: () => setState(() {
+                            due = LocalDue(
+                              year: due!.year,
+                              month: due!.month,
+                              day: due!.day,
+                            );
+                          }),
+                          icon: const Icon(Icons.clear),
+                        ),
+                    ],
+                  ),
+                ),
+              DropdownButtonFormField<String>(
+                initialValue: repeatType,
+                decoration: const InputDecoration(labelText: 'Repeat'),
+                items: const [
+                  DropdownMenuItem(value: 'never', child: Text('Never')),
+                  DropdownMenuItem(value: 'daily', child: Text('Daily')),
+                  DropdownMenuItem(
+                    value: 'weekdays',
+                    child: Text('Every weekday'),
+                  ),
+                  DropdownMenuItem(value: 'weekly', child: Text('Weekly')),
+                  DropdownMenuItem(value: 'monthly', child: Text('Monthly')),
+                  DropdownMenuItem(value: 'yearly', child: Text('Yearly')),
+                  DropdownMenuItem(value: 'custom', child: Text('Custom')),
+                ],
+                onChanged: (value) => setState(() {
+                  repeatType = value ?? 'never';
+                  repeatChanged = true;
+                }),
+              ),
+              if (repeatType == 'custom') ...[
+                if (recurrenceError)
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Enter an interval from 1 to 9999.'),
+                  ),
+                Row(
+                  children: [
+                    const Text('Every'),
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      width: 88,
+                      child: TextField(
+                        controller: everyController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: 'Count'),
+                        onChanged: (_) => setState(() {
+                          repeatChanged = true;
+                          recurrenceError = false;
+                        }),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: DropdownButtonFormField<RepeatInterval>(
+                        initialValue: interval,
+                        items: const [
+                          DropdownMenuItem(
+                            value: RepeatInterval.days,
+                            child: Text('days'),
+                          ),
+                          DropdownMenuItem(
+                            value: RepeatInterval.weeks,
+                            child: Text('weeks'),
+                          ),
+                        ],
+                        onChanged: (value) => setState(() {
+                          interval = value ?? RepeatInterval.days;
+                          repeatChanged = true;
+                        }),
+                      ),
+                    ),
+                  ],
+                ),
+                if (interval == RepeatInterval.weeks)
+                  Wrap(
+                    spacing: 4,
+                    children: [
+                      for (final weekday in Weekday.values)
+                        FilterChip(
+                          label: Text(_weekdayLabel(weekday)),
+                          selected: weekdays.contains(weekday),
+                          onSelected: (selected) => setState(() {
+                            if (selected) {
+                              weekdays.add(weekday);
+                            } else {
+                              weekdays.remove(weekday);
+                            }
+                            repeatChanged = true;
+                          }),
+                        ),
+                    ],
+                  ),
+              ],
+            ],
+          ),
+        ),
       ),
-    ],
-  );
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(onPressed: _save, child: const Text('Save')),
+      ],
+    );
+  }
+
+  String _weekdayLabel(Weekday weekday) => switch (weekday) {
+    Weekday.monday => 'Mon',
+    Weekday.tuesday => 'Tue',
+    Weekday.wednesday => 'Wed',
+    Weekday.thursday => 'Thu',
+    Weekday.friday => 'Fri',
+    Weekday.saturday => 'Sat',
+    Weekday.sunday => 'Sun',
+  };
 }
