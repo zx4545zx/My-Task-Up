@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_task_up/app/app.dart';
+import 'package:my_task_up/core/database/app_database.dart';
+import 'package:my_task_up/core/database/database_provider.dart';
 
 void main() {
   testWidgets('navigation labels open their matching routes', (tester) async {
-    _setWidth(tester, 390);
-    await tester.pumpWidget(const ProviderScope(child: MyTaskUpApp()));
+    await _pumpApp(tester, 390);
 
     expect(find.text('Your inbox is ready.'), findsOneWidget);
     await tester.tap(find.text('Today').first);
@@ -27,8 +29,7 @@ void main() {
   });
 
   testWidgets('theme controls update the rendered theme mode', (tester) async {
-    _setWidth(tester, 900);
-    await tester.pumpWidget(const ProviderScope(child: MyTaskUpApp()));
+    await _pumpApp(tester, 900);
     await tester.tap(find.text('Settings').first);
     await tester.pumpAndSettle();
 
@@ -61,8 +62,7 @@ void main() {
     testWidgets('$layoutName navigation renders at $width pixels', (
       tester,
     ) async {
-      _setWidth(tester, width);
-      await tester.pumpWidget(const ProviderScope(child: MyTaskUpApp()));
+      await _pumpApp(tester, width);
 
       expect(find.text('My Task Up'), findsOneWidget);
       expect(find.text('Inbox'), findsWidgets);
@@ -82,6 +82,22 @@ void main() {
       }
     });
   }
+}
+
+Future<void> _pumpApp(WidgetTester tester, double width) async {
+  _setWidth(tester, width);
+  final database = AppDatabase.forTesting(NativeDatabase.memory());
+  addTearDown(database.close);
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [appDatabaseProvider.overrideWithValue(database)],
+      child: const MyTaskUpApp(),
+    ),
+  );
+  await tester.runAsync(
+    () => Future<void>.delayed(const Duration(milliseconds: 100)),
+  );
+  await tester.pump(const Duration(milliseconds: 300));
 }
 
 void _setWidth(WidgetTester tester, double width) {

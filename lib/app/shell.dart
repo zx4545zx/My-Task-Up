@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/lists/list_navigation.dart';
 import '../features/navigation/shell_destination.dart';
 
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({required this.location, required this.child, super.key});
 
   final String location;
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final destination = ShellDestination.fromLocation(location);
     final selectedIndex = destination == null
         ? 0
@@ -19,7 +21,12 @@ class AppShell extends StatelessWidget {
       builder: (context, constraints) {
         if (constraints.maxWidth < 700) {
           return Scaffold(
-            appBar: _appBar(),
+            drawer: Drawer(
+              child: SafeArea(
+                child: ListNavigation(location: location, closeOnSelect: true),
+              ),
+            ),
+            appBar: _appBar(showMenu: true),
             body: child,
             bottomNavigationBar: NavigationBar(
               selectedIndex: selectedIndex,
@@ -38,7 +45,12 @@ class AppShell extends StatelessWidget {
 
         if (constraints.maxWidth <= 1100) {
           return Scaffold(
-            appBar: _appBar(),
+            drawer: Drawer(
+              child: SafeArea(
+                child: ListNavigation(location: location, closeOnSelect: true),
+              ),
+            ),
+            appBar: _appBar(showMenu: true),
             body: Row(
               children: [
                 NavigationRail(
@@ -62,22 +74,10 @@ class AppShell extends StatelessWidget {
         }
 
         return Scaffold(
-          appBar: _appBar(),
+          appBar: _appBar(showMenu: false),
           body: Row(
             children: [
-              SizedBox(
-                width: 244,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (final item in ShellDestination.values)
-                      _SidebarDestination(
-                        destination: item,
-                        selected: destination == item,
-                      ),
-                  ],
-                ),
-              ),
+              SizedBox(width: 244, child: ListNavigation(location: location)),
               const VerticalDivider(width: 1),
               Expanded(child: child),
               const VerticalDivider(width: 1),
@@ -109,29 +109,18 @@ class AppShell extends StatelessWidget {
     );
   }
 
-  AppBar _appBar() =>
-      AppBar(title: const Text('My Task Up'), automaticallyImplyLeading: false);
-}
-
-class _SidebarDestination extends StatelessWidget {
-  const _SidebarDestination({
-    required this.destination,
-    required this.selected,
-  });
-
-  final ShellDestination destination;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-    child: ListTile(
-      selected: selected,
-      leading: Icon(destination.icon),
-      title: Text(destination.label),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      onTap: () => context.go(destination.path),
-    ),
+  AppBar _appBar({required bool showMenu}) => AppBar(
+    leading: showMenu
+        ? Builder(
+            builder: (context) => IconButton(
+              tooltip: 'Open navigation menu',
+              icon: const Icon(Icons.menu),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
+          )
+        : null,
+    title: const Text('My Task Up'),
+    automaticallyImplyLeading: false,
   );
 }
 

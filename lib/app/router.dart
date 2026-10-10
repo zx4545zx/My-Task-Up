@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/domain/ids.dart';
+import '../features/lists/task_list_page.dart';
 import '../features/navigation/shell_destination.dart';
 import '../features/settings/settings_page.dart';
 import 'shell.dart';
@@ -36,10 +38,23 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/lists/:listId',
-            builder: (context, state) => PlaceholderPage(
-              title: 'My List',
-              message: 'List ID: ${state.pathParameters['listId']}',
-            ),
+            builder: (context, state) {
+              final value = state.pathParameters['listId'];
+              if (value == null) {
+                return const PlaceholderPage(
+                  title: 'List not found',
+                  message: 'This list does not exist.',
+                );
+              }
+              try {
+                return TaskListPage(listId: ListId.parse(value));
+              } on FormatException {
+                return const PlaceholderPage(
+                  title: 'List not found',
+                  message: 'This list does not exist.',
+                );
+              }
+            },
           ),
           GoRoute(
             path: ShellDestination.settings.path,
