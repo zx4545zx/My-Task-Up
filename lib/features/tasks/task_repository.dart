@@ -27,6 +27,30 @@ final class TaskRepository {
           .map(_fromRow)
           .toList();
 
+  Future<List<Task>> dueOn(DateTime day) async =>
+      (await (database.select(database.tasks)
+                ..where((task) => task.dueDay.equals(_dayKey(day)))
+                ..orderBy([
+                  (task) => OrderingTerm.asc(task.listId),
+                  (task) => OrderingTerm.asc(task.dueMinute),
+                  (task) => OrderingTerm.asc(task.position),
+                ]))
+              .get())
+          .map(_fromRow)
+          .toList();
+
+  Future<List<Task>> upcomingAfter(DateTime day) async =>
+      (await (database.select(database.tasks)
+                ..where((task) => task.dueDay.isBiggerThanValue(_dayKey(day)))
+                ..orderBy([
+                  (task) => OrderingTerm.asc(task.dueDay),
+                  (task) => OrderingTerm.asc(task.dueMinute),
+                  (task) => OrderingTerm.asc(task.position),
+                ]))
+              .get())
+          .map(_fromRow)
+          .toList();
+
   Future<List<Task>> subtasksFor(TaskId parentId) async =>
       (await (database.select(database.tasks)
                 ..where((task) => task.parentId.equals(parentId.value))
@@ -340,6 +364,8 @@ final class TaskRepository {
     )..where((entry) => entry.id.equals('primary'))).getSingle();
     return ListId.parse(settings.defaultListId);
   }
+
+  int _dayKey(DateTime day) => day.year * 10000 + day.month * 100 + day.day;
 
   Task _fromRow(StoredTask row) {
     final dueDay = row.dueDay;

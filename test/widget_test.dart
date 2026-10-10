@@ -13,11 +13,11 @@ void main() {
     expect(find.text('Inbox'), findsWidgets);
     await tester.tap(find.text('Today').first);
     await tester.pumpAndSettle();
-    expect(find.text('Tasks due today will appear here.'), findsOneWidget);
+    expect(find.text('No tasks due here.'), findsOneWidget);
 
     await tester.tap(find.text('Upcoming').first);
     await tester.pumpAndSettle();
-    expect(find.text('Upcoming tasks will appear here.'), findsOneWidget);
+    expect(find.text('No tasks due here.'), findsOneWidget);
 
     await tester.tap(find.text('Settings').first);
     await tester.pumpAndSettle();

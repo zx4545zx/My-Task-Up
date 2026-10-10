@@ -5,6 +5,7 @@ import '../core/domain/ids.dart';
 import '../features/lists/task_list_page.dart';
 import '../features/navigation/shell_destination.dart';
 import '../features/settings/settings_page.dart';
+import '../features/tasks/task_due_page.dart';
 import 'shell.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -21,17 +22,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: ShellDestination.today.path,
-            builder: (context, state) => const PlaceholderPage(
-              title: 'Today',
-              message: 'Tasks due today will appear here.',
-            ),
+            builder: (context, state) => const TaskDuePage(upcoming: false),
           ),
           GoRoute(
             path: ShellDestination.upcoming.path,
-            builder: (context, state) => const PlaceholderPage(
-              title: 'Upcoming',
-              message: 'Upcoming tasks will appear here.',
-            ),
+            builder: (context, state) => const TaskDuePage(upcoming: true),
           ),
           GoRoute(
             path: '/lists/:listId',

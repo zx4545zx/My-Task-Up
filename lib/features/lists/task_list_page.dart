@@ -64,41 +64,47 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
                         const Center(child: CircularProgressIndicator()),
                     error: (error, stackTrace) =>
                         const Center(child: Text('Tasks could not be loaded.')),
-                    data: (items) => items.isEmpty
-                        ? const Center(child: Text('No tasks yet.'))
-                        : ReorderableListView.builder(
-                            buildDefaultDragHandles: true,
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            itemCount: items.length,
-                            onReorderItem: (oldIndex, newIndex) =>
-                                _reorderTasks(items, oldIndex, newIndex),
-                            itemBuilder: (context, index) {
-                              final task = items[index];
-                              return ListTile(
-                                key: ValueKey(task.id),
-                                leading: Checkbox(
-                                  value: task.isCompleted,
-                                  onChanged: (_) => _toggleTask(task),
-                                ),
-                                title: Text(
-                                  task.title.value,
-                                  style: task.isCompleted
-                                      ? const TextStyle(
-                                          decoration:
-                                              TextDecoration.lineThrough,
-                                        )
-                                      : null,
-                                ),
-                                subtitle: task.notes == null
-                                    ? null
-                                    : Text(task.notes!),
-                                selected:
-                                    ref.watch(selectedTaskIdProvider) ==
-                                    task.id,
-                                onTap: () => _openTask(task.id),
-                              );
-                            },
-                          ),
+                    data: (items) {
+                      final active = items
+                          .where((task) => !task.isCompleted)
+                          .toList();
+                      final completed = items
+                          .where((task) => task.isCompleted)
+                          .toList();
+                      return CustomScrollView(
+                        slivers: [
+                          if (active.isEmpty)
+                            const SliverToBoxAdapter(
+                              child: Padding(
+                                padding: EdgeInsets.all(24),
+                                child: Center(child: Text('No active tasks.')),
+                              ),
+                            )
+                          else
+                            SliverReorderableList(
+                              itemCount: active.length,
+                              onReorderItem: (oldIndex, newIndex) =>
+                                  _reorderTasks(
+                                    active,
+                                    completed,
+                                    oldIndex,
+                                    newIndex,
+                                  ),
+                              itemBuilder: (context, index) =>
+                                  _buildTaskTile(active[index]),
+                            ),
+                          if (completed.isNotEmpty)
+                            SliverToBoxAdapter(
+                              child: ExpansionTile(
+                                title: Text('Completed (${completed.length})'),
+                                children: completed
+                                    .map(_buildTaskTile)
+                                    .toList(),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ],
@@ -120,6 +126,23 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
       if (mounted) _showError('Could not create the task.');
     }
   }
+
+  Widget _buildTaskTile(Task task) => ListTile(
+    key: ValueKey(task.id),
+    leading: Checkbox(
+      value: task.isCompleted,
+      onChanged: (_) => _toggleTask(task),
+    ),
+    title: Text(
+      task.title.value,
+      style: task.isCompleted
+          ? const TextStyle(decoration: TextDecoration.lineThrough)
+          : null,
+    ),
+    subtitle: task.notes == null ? null : Text(task.notes!),
+    selected: ref.watch(selectedTaskIdProvider) == task.id,
+    onTap: () => _openTask(task.id),
+  );
 
   Future<void> _toggleTask(Task task) async {
     try {
@@ -153,14 +176,16 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
   }
 
   Future<void> _reorderTasks(
-    List<Task> tasks,
+    List<Task> active,
+    List<Task> completed,
     int oldIndex,
     int newIndex,
   ) async {
     if (newIndex == oldIndex) return;
-    final reordered = tasks.toList();
+    final reordered = active.toList();
     final task = reordered.removeAt(oldIndex);
     reordered.insert(newIndex, task);
+    reordered.addAll(completed);
     try {
       await ref
           .read(taskRepositoryProvider)
