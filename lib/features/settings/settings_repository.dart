@@ -5,9 +5,10 @@ import '../../core/domain/app_settings.dart';
 import '../../core/domain/ids.dart';
 
 final class SettingsRepository {
-  const SettingsRepository(this.database);
+  SettingsRepository(this.database);
 
   final AppDatabase database;
+  Future<void> _updates = Future<void>.value();
 
   Future<AppSettings> get() async {
     final row = await (database.select(
@@ -32,4 +33,26 @@ final class SettingsRepository {
           themeMode: Value(settings.themeMode.name),
         ),
       );
+
+  Future<void> update({
+    ListId? defaultListId,
+    bool? showCompleted,
+    bool? notificationsEnabled,
+    AppThemeMode? themeMode,
+  }) {
+    final operation = _updates.catchError((_) {}).then((_) async {
+      final current = await get();
+      await save(
+        AppSettings(
+          defaultListId: defaultListId ?? current.defaultListId,
+          showCompleted: showCompleted ?? current.showCompleted,
+          notificationsEnabled:
+              notificationsEnabled ?? current.notificationsEnabled,
+          themeMode: themeMode ?? current.themeMode,
+        ),
+      );
+    });
+    _updates = operation;
+    return operation;
+  }
 }

@@ -34,9 +34,19 @@ void main() {
       expect(lists.single.name, 'Inbox');
       expect(lists.single.isInbox, isTrue);
 
-      final settings = await SettingsRepository(database).get();
+      final settingsRepository = SettingsRepository(database);
+      final settings = await settingsRepository.get();
       expect(settings.defaultListId, ListId.inbox);
       expect(settings.themeMode, AppThemeMode.system);
+      final work = await ListRepository(database).create('Work');
+      await settingsRepository.save(
+        AppSettings(
+          defaultListId: work.id,
+          showCompleted: false,
+          notificationsEnabled: false,
+          themeMode: AppThemeMode.dark,
+        ),
+      );
 
       final now = DateTime.utc(2026, 10, 10);
       final task = Task(
@@ -59,6 +69,10 @@ void main() {
 
       database = AppDatabase.forTesting(NativeDatabase(file));
       final restored = await TaskRepository(database).get(task.id);
+      final restoredSettings = await SettingsRepository(database).get();
+      expect(restoredSettings.defaultListId, work.id);
+      expect(restoredSettings.showCompleted, isFalse);
+      expect(restoredSettings.themeMode, AppThemeMode.dark);
       expect(restored?.title.value, 'Write tests');
       expect(restored?.notes, 'survives restart');
       expect(restored?.due?.dayKey, 20270228);

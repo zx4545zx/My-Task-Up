@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/domain/task.dart';
+import '../settings/settings_providers.dart';
 import 'task_detail_panel.dart';
 import 'task_providers.dart';
 
@@ -16,6 +17,8 @@ class TaskDuePage extends ConsumerWidget {
     final tasks = ref.watch(
       upcoming ? upcomingTasksProvider : todayTasksProvider,
     );
+    final showCompleted =
+        ref.watch(appSettingsProvider).asData?.value.showCompleted ?? true;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -64,7 +67,7 @@ class TaskDuePage extends ConsumerWidget {
                         ),
                       ),
                     ],
-                  if (completed.isNotEmpty)
+                  if (showCompleted && completed.isNotEmpty)
                     SliverToBoxAdapter(
                       child: ExpansionTile(
                         title: Text('Completed (${completed.length})'),

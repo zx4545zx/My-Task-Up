@@ -21,6 +21,28 @@ final class TaskRepository {
   Future<List<Task>> all() async =>
       (await database.select(database.tasks).get()).map(_fromRow).toList();
 
+  Future<List<Task>> search(String query) async {
+    final term = query
+        .trim()
+        .replaceAll('\\', '\\\\')
+        .replaceAll('%', '\\%')
+        .replaceAll('_', '\\_');
+    if (term.isEmpty) return const [];
+    return (await (database.select(database.tasks)
+              ..where(
+                (task) =>
+                    task.title.like('%$term%', escapeChar: '\\') |
+                    task.notes.like('%$term%', escapeChar: '\\'),
+              )
+              ..orderBy([
+                (task) => OrderingTerm.asc(task.listId),
+                (task) => OrderingTerm.asc(task.position),
+              ]))
+            .get())
+        .map(_fromRow)
+        .toList();
+  }
+
   Future<List<Task>> forList(ListId listId) async =>
       (await (database.select(database.tasks)
                 ..where(
@@ -125,31 +147,36 @@ final class TaskRepository {
     ListId listId,
     TaskId? parentId,
     List<TaskId> orderedIds,
-  ) => database.transaction(() async {
-    final siblings =
-        await (database.select(database.tasks)..where(
-              (task) =>
-                  task.listId.equals(listId.value) &
-                  (parentId == null
-                      ? task.parentId.isNull()
-                      : task.parentId.equals(parentId.value)),
-            ))
-            .get();
-    final existingIds = siblings.map((task) => task.id).toSet();
-    final requestedIds = orderedIds.map((id) => id.value).toSet();
-    if (orderedIds.length != siblings.length ||
-        requestedIds.length != siblings.length ||
-        requestedIds.difference(existingIds).isNotEmpty ||
-        existingIds.difference(requestedIds).isNotEmpty) {
-      throw StateError('Reordering must include every sibling exactly once.');
-    }
-    final now = DateTime.now().millisecondsSinceEpoch;
-    for (var index = 0; index < orderedIds.length; index++) {
-      await (database.update(database.tasks)
-            ..where((task) => task.id.equals(orderedIds[index].value)))
-          .write(TasksCompanion(position: Value(index), updatedAt: Value(now)));
-    }
-  });
+  ) async {
+    await database.transaction(() async {
+      final siblings =
+          await (database.select(database.tasks)..where(
+                (task) =>
+                    task.listId.equals(listId.value) &
+                    (parentId == null
+                        ? task.parentId.isNull()
+                        : task.parentId.equals(parentId.value)),
+              ))
+              .get();
+      final existingIds = siblings.map((task) => task.id).toSet();
+      final requestedIds = orderedIds.map((id) => id.value).toSet();
+      if (orderedIds.length != siblings.length ||
+          requestedIds.length != siblings.length ||
+          requestedIds.difference(existingIds).isNotEmpty ||
+          existingIds.difference(requestedIds).isNotEmpty) {
+        throw StateError('Reordering must include every sibling exactly once.');
+      }
+      final now = DateTime.now().millisecondsSinceEpoch;
+      for (var index = 0; index < orderedIds.length; index++) {
+        await (database.update(
+          database.tasks,
+        )..where((task) => task.id.equals(orderedIds[index].value))).write(
+          TasksCompanion(position: Value(index), updatedAt: Value(now)),
+        );
+      }
+    });
+    await _syncReminders();
+  }
 
   Future<Task> moveToList(TaskId id, ListId destination) async {
     Task? moved;

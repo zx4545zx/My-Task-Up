@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../core/domain/ids.dart';
 import '../features/lists/task_list_page.dart';
 import '../features/navigation/shell_destination.dart';
+import '../features/search/search_page.dart';
 import '../features/settings/settings_page.dart';
 import '../features/tasks/task_due_page.dart';
 import 'shell.dart';
@@ -47,6 +48,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                 );
               }
             },
+          ),
+          GoRoute(
+            path: '/search',
+            builder: (context, state) => const SearchPage(),
           ),
           GoRoute(
             path: ShellDestination.settings.path,

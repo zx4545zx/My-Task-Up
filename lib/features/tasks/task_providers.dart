@@ -9,13 +9,34 @@ import 'task_repository.dart';
 final taskRepositoryProvider = Provider<TaskRepository>(
   (ref) => TaskRepository(
     ref.watch(appDatabaseProvider),
-    onChanged: () => ref.read(reminderCoordinatorProvider).reconcile(),
+    onChanged: () {
+      ref.read(taskSearchRevisionProvider.notifier).changed();
+      return ref.read(reminderCoordinatorProvider).reconcile();
+    },
   ),
 );
+
+final taskSearchRevisionProvider =
+    NotifierProvider<TaskSearchRevisionController, int>(
+      TaskSearchRevisionController.new,
+    );
+
+class TaskSearchRevisionController extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void changed() => state++;
+}
 
 final tasksForListProvider = FutureProvider.family<List<Task>, ListId>(
   (ref, listId) => ref.watch(taskRepositoryProvider).forList(listId),
 );
+
+final taskSearchProvider = FutureProvider.autoDispose
+    .family<List<Task>, String>((ref, query) {
+      ref.watch(taskSearchRevisionProvider);
+      return ref.watch(taskRepositoryProvider).search(query);
+    });
 
 final taskProvider = FutureProvider.family<Task?, TaskId>(
   (ref, taskId) => ref.watch(taskRepositoryProvider).get(taskId),

@@ -127,6 +127,33 @@ void main() {
     expect(occurrences[2].due?.dayKey, 20260331);
   });
 
+  test('search matches titles and notes across lists', () async {
+    final work = await ListRepository(database).create('Work');
+    final inboxTask = await tasks.create(title: 'Plan launch');
+    final literal = await tasks.create(title: '100% done');
+    final workTask = await tasks.create(
+      title: 'Quarterly report',
+      listId: work.id,
+    );
+    await tasks.edit(
+      workTask.id,
+      title: workTask.title.value,
+      notes: 'Reference needle',
+      due: null,
+      repeat: const NeverRepeat(),
+    );
+
+    expect((await tasks.search('launch')).map((task) => task.id), [
+      inboxTask.id,
+    ]);
+    expect((await tasks.search('NEEDLE')).map((task) => task.id), [
+      workTask.id,
+    ]);
+    expect(await tasks.search('missing'), isEmpty);
+    expect((await tasks.search('%')).map((task) => task.id), [literal.id]);
+    expect(await tasks.search('  '), isEmpty);
+  });
+
   test('creates single-level subtasks and rejects nested subtasks', () async {
     final parent = await tasks.create(title: 'Plan trip');
     final child = await tasks.createSubtask(parent.id, 'Book flights');

@@ -141,6 +141,13 @@ class _AppShellState extends ConsumerState<AppShell>
         : null,
     title: const Text('My Task Up'),
     automaticallyImplyLeading: false,
+    actions: [
+      IconButton(
+        tooltip: 'Search tasks',
+        icon: const Icon(Icons.search),
+        onPressed: () => context.go('/search'),
+      ),
+    ],
   );
 }
 

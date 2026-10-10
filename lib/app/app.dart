@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../features/settings/theme_mode_controller.dart';
+import '../core/domain/app_settings.dart';
+import '../features/settings/settings_providers.dart';
 import 'router.dart';
 
 class MyTaskUpApp extends ConsumerWidget {
@@ -9,7 +10,12 @@ class MyTaskUpApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
+    final settings = ref.watch(appSettingsProvider).asData?.value;
+    final themeMode = switch (settings?.themeMode ?? AppThemeMode.system) {
+      AppThemeMode.system => ThemeMode.system,
+      AppThemeMode.light => ThemeMode.light,
+      AppThemeMode.dark => ThemeMode.dark,
+    };
     return MaterialApp.router(
       title: 'My Task Up',
       theme: _theme(Brightness.light),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../settings/settings_providers.dart';
 import '../../core/domain/ids.dart';
 import '../../core/domain/task.dart';
 import '../../features/tasks/task_detail_panel.dart';
@@ -29,6 +31,8 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
   Widget build(BuildContext context) {
     final list = ref.watch(taskListProvider(widget.listId));
     final tasks = ref.watch(tasksForListProvider(widget.listId));
+    final showCompleted =
+        ref.watch(appSettingsProvider).asData?.value.showCompleted ?? true;
     return list.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stackTrace) =>
@@ -93,7 +97,7 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
                               itemBuilder: (context, index) =>
                                   _buildTaskTile(active[index]),
                             ),
-                          if (completed.isNotEmpty)
+                          if (showCompleted && completed.isNotEmpty)
                             SliverToBoxAdapter(
                               child: ExpansionTile(
                                 title: Text('Completed (${completed.length})'),
@@ -117,10 +121,16 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
     try {
       final task = await ref
           .read(taskRepositoryProvider)
-          .create(title: title, listId: widget.listId);
+          .create(
+            title: title,
+            listId: widget.listId == ListId.inbox ? null : widget.listId,
+          );
       _titleController.clear();
-      ref.invalidate(tasksForListProvider(widget.listId));
+      ref.invalidate(tasksForListProvider(task.listId));
       ref.read(selectedTaskIdProvider.notifier).select(task.id);
+      if (task.listId != widget.listId && mounted) {
+        context.go('/lists/${task.listId.value}');
+      }
     } catch (error) {
       debugPrint('Could not create task: $error');
       if (mounted) _showError('Could not create the task.');

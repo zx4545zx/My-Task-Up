@@ -8,7 +8,6 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/database/app_database.dart';
-import '../../core/domain/app_settings.dart';
 import '../settings/settings_repository.dart';
 
 const reminderUnsupportedMessage =
@@ -46,9 +45,8 @@ final class ReminderCoordinator {
   }
 
   Future<ReminderToggleResult> setEnabled(bool enabled) async {
-    final current = await settings.get();
     if (!enabled) {
-      await settings.save(_withNotifications(current, false));
+      await settings.update(notificationsEnabled: false);
       try {
         await reconcile();
         return const ReminderToggleResult(enabled: false);
@@ -70,14 +68,14 @@ final class ReminderCoordinator {
     try {
       await platform.initialize();
       if (!await platform.requestPermission()) {
-        await settings.save(_withNotifications(current, false));
+        await settings.update(notificationsEnabled: false);
         await reconcile();
         return const ReminderToggleResult(
           enabled: false,
           message: 'Notification permission was not granted.',
         );
       }
-      await settings.save(_withNotifications(current, true));
+      await settings.update(notificationsEnabled: true);
       await reconcile();
       final pendingSchedules = await (database.select(
         database.reminderRegistrations,
@@ -90,7 +88,7 @@ final class ReminderCoordinator {
       );
     } catch (error, stackTrace) {
       _logReminderError('enable reminders', error, stackTrace);
-      await settings.save(_withNotifications(current, false));
+      await settings.update(notificationsEnabled: false);
       try {
         await reconcile();
       } catch (cleanupError, cleanupStackTrace) {
@@ -242,14 +240,6 @@ final class ReminderCoordinator {
           dueMinute: Value(task.dueMinute!),
           state: Value(state),
         ),
-      );
-
-  AppSettings _withNotifications(AppSettings settings, bool enabled) =>
-      AppSettings(
-        defaultListId: settings.defaultListId,
-        showCompleted: settings.showCompleted,
-        notificationsEnabled: enabled,
-        themeMode: settings.themeMode,
       );
 }
 

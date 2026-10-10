@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/domain/task_list.dart';
 import '../navigation/shell_destination.dart';
+import '../settings/settings_providers.dart';
+import '../tasks/task_providers.dart';
 import 'list_providers.dart';
 import 'list_repository.dart';
 
@@ -193,6 +195,8 @@ class ListNavigation extends ConsumerWidget {
           .read(listRepositoryProvider)
           .delete(list.id, disposition: disposition);
       ref.invalidate(taskListsProvider);
+      ref.invalidate(appSettingsProvider);
+      ref.read(taskSearchRevisionProvider.notifier).changed();
       if (location == '/lists/${list.id.value}' && context.mounted) {
         _go(context, ShellDestination.inbox.path);
       }

@@ -4,7 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_task_up/app/app.dart';
 import 'package:my_task_up/core/database/app_database.dart';
+import 'package:my_task_up/core/domain/app_settings.dart';
+import 'package:my_task_up/core/domain/ids.dart';
+import 'package:my_task_up/core/domain/task.dart';
 import 'package:my_task_up/core/database/database_provider.dart';
+import 'package:my_task_up/features/lists/list_repository.dart';
+import 'package:my_task_up/features/settings/settings_repository.dart';
+import 'package:my_task_up/features/tasks/task_repository.dart';
 
 void main() {
   testWidgets('navigation labels open their matching routes', (tester) async {
@@ -21,7 +27,7 @@ void main() {
 
     await tester.tap(find.text('Settings').first);
     await tester.pumpAndSettle();
-    expect(find.text('Theme mode: System'), findsOneWidget);
+    expect(find.text('Theme'), findsOneWidget);
 
     await tester.tap(find.text('Inbox').first);
     await tester.pumpAndSettle();
@@ -40,18 +46,93 @@ void main() {
     ]) {
       await tester.tap(find.widgetWithText(ChoiceChip, label));
       await tester.pumpAndSettle();
-      expect(find.text('Theme mode: $label'), findsOneWidget);
       final chip = tester.widget<ChoiceChip>(
         find.widgetWithText(ChoiceChip, label),
       );
       expect(chip.selected, isTrue);
       if (brightness != null) {
         expect(
-          Theme.of(tester.element(find.text('Theme mode: $label'))).brightness,
+          Theme.of(
+            tester.element(find.widgetWithText(ChoiceChip, label)),
+          ).brightness,
           brightness,
         );
       }
     }
+  });
+
+  testWidgets('search finds task titles and notes across lists', (
+    tester,
+  ) async {
+    final database = await _pumpApp(tester, 1400);
+    final repository = TaskRepository(database);
+    final task = await repository.create(title: 'Quarterly plan');
+    await repository.edit(
+      task.id,
+      title: task.title.value,
+      notes: 'needle in the notes',
+      due: null,
+      repeat: const NeverRepeat(),
+    );
+    final completed = await repository.create(title: 'Completed needle');
+    await repository.complete(completed.id, at: DateTime.now());
+    await tester.tap(find.text('Settings').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Show completed tasks'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Search tasks'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'needle');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Quarterly plan'), findsOneWidget);
+    expect(find.text('Completed needle'), findsNothing);
+
+    await tester.tap(find.text('Quarterly plan'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit').first);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'Updated plan');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('Updated plan'), findsOneWidget);
+    expect(await repository.get(task.id), isNotNull);
+  });
+
+  testWidgets('settings persist default list, theme and completed visibility', (
+    tester,
+  ) async {
+    final database = await _pumpApp(tester, 900);
+    final work = await ListRepository(database).create('Work');
+    await tester.tap(find.text('Settings').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownButtonFormField<ListId>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Work').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Dark'));
+    await tester.tap(find.text('Show completed tasks'));
+    await tester.pumpAndSettle();
+
+    final settings = await SettingsRepository(database).get();
+    expect(settings.defaultListId, work.id);
+    expect(settings.themeMode, AppThemeMode.dark);
+    expect(settings.showCompleted, isFalse);
+
+    await tester.tap(find.text('Inbox').first);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'Default-list task');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(find.text('Default-list task'), findsOneWidget);
+    expect(
+      (await TaskRepository(database).all()).any(
+        (task) =>
+            task.title.value == 'Default-list task' && task.listId == work.id,
+      ),
+      isTrue,
+    );
   });
 
   for (final (width, layoutName) in [
@@ -84,7 +165,7 @@ void main() {
   }
 }
 
-Future<void> _pumpApp(WidgetTester tester, double width) async {
+Future<AppDatabase> _pumpApp(WidgetTester tester, double width) async {
   _setWidth(tester, width);
   final database = AppDatabase.forTesting(NativeDatabase.memory());
   addTearDown(database.close);
@@ -98,6 +179,7 @@ Future<void> _pumpApp(WidgetTester tester, double width) async {
     () => Future<void>.delayed(const Duration(milliseconds: 100)),
   );
   await tester.pump(const Duration(milliseconds: 300));
+  return database;
 }
 
 void _setWidth(WidgetTester tester, double width) {
