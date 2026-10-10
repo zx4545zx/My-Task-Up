@@ -196,7 +196,7 @@ class ListNavigation extends ConsumerWidget {
           .delete(list.id, disposition: disposition);
       ref.invalidate(taskListsProvider);
       ref.invalidate(appSettingsProvider);
-      ref.read(taskSearchRevisionProvider.notifier).changed();
+      ref.read(databaseRevisionProvider.notifier).changed();
       if (location == '/lists/${list.id.value}' && context.mounted) {
         _go(context, ShellDestination.inbox.path);
       }

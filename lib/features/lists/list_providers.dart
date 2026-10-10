@@ -4,6 +4,7 @@ import '../../core/database/database_provider.dart';
 import '../../core/domain/ids.dart';
 import '../../core/domain/task_list.dart';
 import '../reminders/reminder_providers.dart';
+import '../tasks/task_providers.dart';
 import 'list_repository.dart';
 
 final listRepositoryProvider = Provider<ListRepository>(
@@ -13,10 +14,12 @@ final listRepositoryProvider = Provider<ListRepository>(
   ),
 );
 
-final taskListsProvider = FutureProvider<List<TaskList>>(
-  (ref) => ref.watch(listRepositoryProvider).all(),
-);
+final taskListsProvider = FutureProvider<List<TaskList>>((ref) {
+  ref.watch(databaseRevisionProvider);
+  return ref.watch(listRepositoryProvider).all();
+});
 
-final taskListProvider = FutureProvider.family<TaskList?, ListId>(
-  (ref, id) => ref.watch(listRepositoryProvider).get(id),
-);
+final taskListProvider = FutureProvider.family<TaskList?, ListId>((ref, id) {
+  ref.watch(databaseRevisionProvider);
+  return ref.watch(listRepositoryProvider).get(id);
+});

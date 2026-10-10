@@ -135,6 +135,29 @@ void main() {
     );
   });
 
+  testWidgets('delete all data requires confirmation', (tester) async {
+    final database = await _pumpApp(tester, 900);
+    final tasks = TaskRepository(database);
+    final task = await tasks.create(title: 'Keep until confirmed');
+    await tester.tap(find.text('Settings').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Export backup'), findsOneWidget);
+    expect(find.text('Import backup'), findsOneWidget);
+
+    await tester.tap(find.text('Delete all data'));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete all data?'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(await tasks.get(task.id), isNotNull);
+
+    await tester.tap(find.text('Delete all data'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete all').last);
+    await tester.pumpAndSettle();
+    expect(await tasks.all(), isEmpty);
+  });
+
   for (final (width, layoutName) in [
     (390.0, 'mobile'),
     (900.0, 'compact'),

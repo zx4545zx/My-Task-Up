@@ -34,6 +34,8 @@ final class SettingsRepository {
         ),
       );
 
+  Future<void> waitForPendingUpdates() => _updates;
+
   Future<void> update({
     ListId? defaultListId,
     bool? showCompleted,
