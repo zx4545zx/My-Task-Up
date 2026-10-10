@@ -35,3 +35,16 @@ Use milestone-sized verified increments. For each unit, state the hypothesis, ch
 The first checkpoint is M0. The captured machine has Flutter 3.44.0 and Dart 3.12.0, Chrome and Xcode available, but Flutter doctor reports Android licenses not accepted and CocoaPods missing. Android license acceptance is prohibited. Verify whether Android APK compilation needs accepted licenses and whether macOS builds can proceed without CocoaPods before deciding M0 is blocked. Windows requires CI evidence.
 
 M2 passes locally with generated Drift code, formatting, analysis, tests, a real Chrome Web persistence probe, Web release, Android APK release, and macOS release. Evidence is in `.audit/evidence/m2-local-builds.log` and `.audit/evidence/m2-web-storage.log`. The Chrome probe served both Drift assets and verified the task after closing and reopening its database. Windows release verification is pending a task-branch CI run after these dependency changes. Device behavior is not inferred from these builds.
+
+M8 local gates pass in `.audit/evidence/m8-local-builds.log`: formatting, analysis, tests, Web, Android APK, and macOS release. Plugin source confirms pending Windows notifications can be canceled without MSIX identity; package identity is needed for removing delivered notifications from Windows history. Windows CI and actual native delivery/cancellation remain unverified. Do not advance M8 to VERIFIED until the Windows runner gate is available.
+
+## Fresh continuation workflow
+
+1. Inspect the uncommitted M8 diff and source, validate every prior evidence artifact that will inform decisions, and test actual notification support by checking plugin APIs and available native devices. Fix only verified defects. Gate with formatter, analyzer, automated tests, Web, Android APK, and macOS release before committing.
+2. Push the M8 commit and verify the corresponding Windows CI workflow and artifact directly. Do not count a queued or historical run as a pass. Test runtime delivery/cancellation on available macOS and Android native targets; record unavailable device/permission checks as inconclusive with command evidence, never as success.
+3. Implement M9 search/settings with persistent repository-backed behavior and widget/repository coverage. Gate all local platforms before proceeding.
+4. Implement M10 JSON export/import/delete-all with whole-document validation and transactional rollback. Test both successful round-trip and failure preservation before proceeding.
+5. Implement M11 window management, keyboard shortcuts, context menus, task/list drag behaviors, MSIX packaging, large-list runtime/performance, screenshots, and user-facing run/storage/backup/capability/manual-check documentation. Verify Windows-specific packaging and runtime through CI, and capture responsive screenshots from actual app surfaces.
+6. Run final all-platform gates, inspect the final diff, validate this run's decision rows and linked evidence, and provide a precise verified/unverified checklist to Chief. Never merge or force-push.
+
+Each implementation gate is a stopping point before dependent work. Permission prompts and legal acceptance are not to be bypassed or accepted; report exactly where native runtime validation is blocked.

@@ -39,13 +39,27 @@ class Tasks extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+@DataClassName('ReminderRegistration')
+class ReminderRegistrations extends Table {
+  IntColumn get notificationId => integer().autoIncrement()();
+  TextColumn get taskId => text()();
+  IntColumn get dueDay => integer()();
+  IntColumn get dueMinute => integer()();
+  TextColumn get state => text()();
+
+  @override
+  List<Set<Column<Object>>>? get uniqueKeys => [
+    <Column<Object>>{taskId},
+  ];
+}
+
 @DataClassName('StoredAppSettings')
 class AppSettingsEntries extends Table {
   TextColumn get id => text()();
   TextColumn get defaultListId => text().references(TaskLists, #id)();
   BoolColumn get showCompleted => boolean().withDefault(const Constant(true))();
   BoolColumn get notificationsEnabled =>
-      boolean().withDefault(const Constant(true))();
+      boolean().withDefault(const Constant(false))();
   TextColumn get themeMode => text().withDefault(const Constant('system'))();
 
   @override

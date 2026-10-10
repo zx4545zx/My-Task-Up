@@ -3,17 +3,50 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/lists/list_navigation.dart';
+import '../features/reminders/reminder_providers.dart';
 import '../features/navigation/shell_destination.dart';
 import '../features/tasks/task_detail_panel.dart';
 
-class AppShell extends ConsumerWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({required this.location, required this.child, super.key});
 
   final String location;
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reconcileReminders());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _reconcileReminders();
+  }
+
+  Future<void> _reconcileReminders() async {
+    try {
+      await ref.read(reminderCoordinatorProvider).reconcile();
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final location = widget.location;
+    final child = widget.child;
     final destination = ShellDestination.fromLocation(location);
     final selectedIndex = destination == null
         ? 0

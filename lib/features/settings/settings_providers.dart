@@ -6,3 +6,7 @@ import 'settings_repository.dart';
 final settingsRepositoryProvider = Provider<SettingsRepository>(
   (ref) => SettingsRepository(ref.watch(appDatabaseProvider)),
 );
+
+final appSettingsProvider = FutureProvider(
+  (ref) => ref.watch(settingsRepositoryProvider).get(),
+);

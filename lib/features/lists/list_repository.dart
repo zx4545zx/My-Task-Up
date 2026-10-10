@@ -7,9 +7,10 @@ import '../../core/domain/task_list.dart';
 enum ListTaskDisposition { deleteTasks, moveTasksToInbox }
 
 final class ListRepository {
-  const ListRepository(this.database);
+  const ListRepository(this.database, {this.onChanged});
 
   final AppDatabase database;
+  final Future<void> Function()? onChanged;
 
   Future<List<TaskList>> all() async {
     final rows =
@@ -104,75 +105,81 @@ final class ListRepository {
   Future<void> delete(
     ListId id, {
     required ListTaskDisposition disposition,
-  }) => database.transaction(() async {
-    final list = await (database.select(
-      database.taskLists,
-    )..where((row) => row.id.equals(id.value))).getSingleOrNull();
-    if (list == null) throw StateError('List does not exist.');
-    if (list.isInbox || id == ListId.inbox) {
-      throw StateError('Inbox cannot be deleted.');
-    }
+  }) async {
+    await database.transaction(() async {
+      final list = await (database.select(
+        database.taskLists,
+      )..where((row) => row.id.equals(id.value))).getSingleOrNull();
+      if (list == null) throw StateError('List does not exist.');
+      if (list.isInbox || id == ListId.inbox) {
+        throw StateError('Inbox cannot be deleted.');
+      }
 
-    final tasks =
-        await (database.select(database.tasks)
-              ..where((task) => task.listId.equals(id.value))
-              ..orderBy([
-                (task) => OrderingTerm.asc(task.parentId),
-                (task) => OrderingTerm.asc(task.position),
-              ]))
-            .get();
-    if (disposition == ListTaskDisposition.deleteTasks) {
-      for (final task in tasks.where((task) => task.parentId != null)) {
-        await (database.delete(
+      final tasks =
+          await (database.select(database.tasks)
+                ..where((task) => task.listId.equals(id.value))
+                ..orderBy([
+                  (task) => OrderingTerm.asc(task.parentId),
+                  (task) => OrderingTerm.asc(task.position),
+                ]))
+              .get();
+      if (disposition == ListTaskDisposition.deleteTasks) {
+        for (final task in tasks.where((task) => task.parentId != null)) {
+          await (database.delete(
+            database.tasks,
+          )..where((row) => row.id.equals(task.id))).go();
+        }
+        for (final task in tasks.where((task) => task.parentId == null)) {
+          await (database.delete(
+            database.tasks,
+          )..where((row) => row.id.equals(task.id))).go();
+        }
+      } else {
+        final inboxTasks = await (database.select(
           database.tasks,
-        )..where((row) => row.id.equals(task.id))).go();
+        )..where((task) => task.listId.equals(ListId.inbox.value))).get();
+        final nextPositions = <String?, int>{};
+        for (final task in inboxTasks) {
+          final parentId = task.parentId;
+          nextPositions[parentId] =
+              (nextPositions[parentId] ?? 0) > task.position
+              ? nextPositions[parentId]!
+              : task.position + 1;
+        }
+        final now = DateTime.now().millisecondsSinceEpoch;
+        for (final task in tasks) {
+          final position = nextPositions[task.parentId] ?? 0;
+          nextPositions[task.parentId] = position + 1;
+          await (database.update(
+            database.tasks,
+          )..where((row) => row.id.equals(task.id))).write(
+            TasksCompanion(
+              listId: Value(ListId.inbox.value),
+              position: Value(position),
+              updatedAt: Value(now),
+            ),
+          );
+        }
       }
-      for (final task in tasks.where((task) => task.parentId == null)) {
-        await (database.delete(
-          database.tasks,
-        )..where((row) => row.id.equals(task.id))).go();
-      }
-    } else {
-      final inboxTasks = await (database.select(
-        database.tasks,
-      )..where((task) => task.listId.equals(ListId.inbox.value))).get();
-      final nextPositions = <String?, int>{};
-      for (final task in inboxTasks) {
-        final parentId = task.parentId;
-        nextPositions[parentId] = (nextPositions[parentId] ?? 0) > task.position
-            ? nextPositions[parentId]!
-            : task.position + 1;
-      }
-      final now = DateTime.now().millisecondsSinceEpoch;
-      for (final task in tasks) {
-        final position = nextPositions[task.parentId] ?? 0;
-        nextPositions[task.parentId] = position + 1;
+
+      final settings = await (database.select(
+        database.appSettingsEntries,
+      )..where((row) => row.id.equals('primary'))).getSingle();
+      if (settings.defaultListId == id.value) {
         await (database.update(
-          database.tasks,
-        )..where((row) => row.id.equals(task.id))).write(
-          TasksCompanion(
-            listId: Value(ListId.inbox.value),
-            position: Value(position),
-            updatedAt: Value(now),
-          ),
+          database.appSettingsEntries,
+        )..where((row) => row.id.equals('primary'))).write(
+          AppSettingsEntriesCompanion(defaultListId: Value(ListId.inbox.value)),
         );
       }
-    }
-
-    final settings = await (database.select(
-      database.appSettingsEntries,
-    )..where((row) => row.id.equals('primary'))).getSingle();
-    if (settings.defaultListId == id.value) {
-      await (database.update(
-        database.appSettingsEntries,
-      )..where((row) => row.id.equals('primary'))).write(
-        AppSettingsEntriesCompanion(defaultListId: Value(ListId.inbox.value)),
-      );
-    }
-    await (database.delete(
-      database.taskLists,
-    )..where((row) => row.id.equals(id.value))).go();
-  });
+      await (database.delete(
+        database.taskLists,
+      )..where((row) => row.id.equals(id.value))).go();
+    });
+    try {
+      await onChanged?.call();
+    } catch (_) {}
+  }
 
   Future<void> save(TaskList list) => database
       .into(database.taskLists)

@@ -3,10 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/database/database_provider.dart';
 import '../../core/domain/ids.dart';
 import '../../core/domain/task.dart';
+import '../reminders/reminder_providers.dart';
 import 'task_repository.dart';
 
 final taskRepositoryProvider = Provider<TaskRepository>(
-  (ref) => TaskRepository(ref.watch(appDatabaseProvider)),
+  (ref) => TaskRepository(
+    ref.watch(appDatabaseProvider),
+    onChanged: () => ref.read(reminderCoordinatorProvider).reconcile(),
+  ),
 );
 
 final tasksForListProvider = FutureProvider.family<List<Task>, ListId>(

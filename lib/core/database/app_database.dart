@@ -6,7 +6,9 @@ import 'tables.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [TaskLists, Tasks, AppSettingsEntries])
+@DriftDatabase(
+  tables: [TaskLists, Tasks, ReminderRegistrations, AppSettingsEntries],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase()
     : super(
@@ -31,7 +33,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -52,8 +54,17 @@ class AppDatabase extends _$AppDatabase {
         AppSettingsEntriesCompanion.insert(
           id: 'primary',
           defaultListId: ListId.inbox.value,
+          notificationsEnabled: const Value(false),
         ),
       );
+    },
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(reminderRegistrations);
+        await (update(appSettingsEntries)).write(
+          const AppSettingsEntriesCompanion(notificationsEnabled: Value(false)),
+        );
+      }
     },
   );
 }

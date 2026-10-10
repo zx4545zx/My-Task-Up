@@ -1123,6 +1123,369 @@ class TasksCompanion extends UpdateCompanion<StoredTask> {
   }
 }
 
+class $ReminderRegistrationsTable extends ReminderRegistrations
+    with TableInfo<$ReminderRegistrationsTable, ReminderRegistration> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReminderRegistrationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _notificationIdMeta = const VerificationMeta(
+    'notificationId',
+  );
+  @override
+  late final GeneratedColumn<int> notificationId = GeneratedColumn<int>(
+    'notification_id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _taskIdMeta = const VerificationMeta('taskId');
+  @override
+  late final GeneratedColumn<String> taskId = GeneratedColumn<String>(
+    'task_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dueDayMeta = const VerificationMeta('dueDay');
+  @override
+  late final GeneratedColumn<int> dueDay = GeneratedColumn<int>(
+    'due_day',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dueMinuteMeta = const VerificationMeta(
+    'dueMinute',
+  );
+  @override
+  late final GeneratedColumn<int> dueMinute = GeneratedColumn<int>(
+    'due_minute',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    notificationId,
+    taskId,
+    dueDay,
+    dueMinute,
+    state,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'reminder_registrations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReminderRegistration> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('notification_id')) {
+      context.handle(
+        _notificationIdMeta,
+        notificationId.isAcceptableOrUnknown(
+          data['notification_id']!,
+          _notificationIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('task_id')) {
+      context.handle(
+        _taskIdMeta,
+        taskId.isAcceptableOrUnknown(data['task_id']!, _taskIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_taskIdMeta);
+    }
+    if (data.containsKey('due_day')) {
+      context.handle(
+        _dueDayMeta,
+        dueDay.isAcceptableOrUnknown(data['due_day']!, _dueDayMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dueDayMeta);
+    }
+    if (data.containsKey('due_minute')) {
+      context.handle(
+        _dueMinuteMeta,
+        dueMinute.isAcceptableOrUnknown(data['due_minute']!, _dueMinuteMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dueMinuteMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {notificationId};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {taskId},
+  ];
+  @override
+  ReminderRegistration map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReminderRegistration(
+      notificationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}notification_id'],
+      )!,
+      taskId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}task_id'],
+      )!,
+      dueDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}due_day'],
+      )!,
+      dueMinute: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}due_minute'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+    );
+  }
+
+  @override
+  $ReminderRegistrationsTable createAlias(String alias) {
+    return $ReminderRegistrationsTable(attachedDatabase, alias);
+  }
+}
+
+class ReminderRegistration extends DataClass
+    implements Insertable<ReminderRegistration> {
+  final int notificationId;
+  final String taskId;
+  final int dueDay;
+  final int dueMinute;
+  final String state;
+  const ReminderRegistration({
+    required this.notificationId,
+    required this.taskId,
+    required this.dueDay,
+    required this.dueMinute,
+    required this.state,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['notification_id'] = Variable<int>(notificationId);
+    map['task_id'] = Variable<String>(taskId);
+    map['due_day'] = Variable<int>(dueDay);
+    map['due_minute'] = Variable<int>(dueMinute);
+    map['state'] = Variable<String>(state);
+    return map;
+  }
+
+  ReminderRegistrationsCompanion toCompanion(bool nullToAbsent) {
+    return ReminderRegistrationsCompanion(
+      notificationId: Value(notificationId),
+      taskId: Value(taskId),
+      dueDay: Value(dueDay),
+      dueMinute: Value(dueMinute),
+      state: Value(state),
+    );
+  }
+
+  factory ReminderRegistration.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReminderRegistration(
+      notificationId: serializer.fromJson<int>(json['notificationId']),
+      taskId: serializer.fromJson<String>(json['taskId']),
+      dueDay: serializer.fromJson<int>(json['dueDay']),
+      dueMinute: serializer.fromJson<int>(json['dueMinute']),
+      state: serializer.fromJson<String>(json['state']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'notificationId': serializer.toJson<int>(notificationId),
+      'taskId': serializer.toJson<String>(taskId),
+      'dueDay': serializer.toJson<int>(dueDay),
+      'dueMinute': serializer.toJson<int>(dueMinute),
+      'state': serializer.toJson<String>(state),
+    };
+  }
+
+  ReminderRegistration copyWith({
+    int? notificationId,
+    String? taskId,
+    int? dueDay,
+    int? dueMinute,
+    String? state,
+  }) => ReminderRegistration(
+    notificationId: notificationId ?? this.notificationId,
+    taskId: taskId ?? this.taskId,
+    dueDay: dueDay ?? this.dueDay,
+    dueMinute: dueMinute ?? this.dueMinute,
+    state: state ?? this.state,
+  );
+  ReminderRegistration copyWithCompanion(ReminderRegistrationsCompanion data) {
+    return ReminderRegistration(
+      notificationId: data.notificationId.present
+          ? data.notificationId.value
+          : this.notificationId,
+      taskId: data.taskId.present ? data.taskId.value : this.taskId,
+      dueDay: data.dueDay.present ? data.dueDay.value : this.dueDay,
+      dueMinute: data.dueMinute.present ? data.dueMinute.value : this.dueMinute,
+      state: data.state.present ? data.state.value : this.state,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReminderRegistration(')
+          ..write('notificationId: $notificationId, ')
+          ..write('taskId: $taskId, ')
+          ..write('dueDay: $dueDay, ')
+          ..write('dueMinute: $dueMinute, ')
+          ..write('state: $state')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(notificationId, taskId, dueDay, dueMinute, state);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReminderRegistration &&
+          other.notificationId == this.notificationId &&
+          other.taskId == this.taskId &&
+          other.dueDay == this.dueDay &&
+          other.dueMinute == this.dueMinute &&
+          other.state == this.state);
+}
+
+class ReminderRegistrationsCompanion
+    extends UpdateCompanion<ReminderRegistration> {
+  final Value<int> notificationId;
+  final Value<String> taskId;
+  final Value<int> dueDay;
+  final Value<int> dueMinute;
+  final Value<String> state;
+  const ReminderRegistrationsCompanion({
+    this.notificationId = const Value.absent(),
+    this.taskId = const Value.absent(),
+    this.dueDay = const Value.absent(),
+    this.dueMinute = const Value.absent(),
+    this.state = const Value.absent(),
+  });
+  ReminderRegistrationsCompanion.insert({
+    this.notificationId = const Value.absent(),
+    required String taskId,
+    required int dueDay,
+    required int dueMinute,
+    required String state,
+  }) : taskId = Value(taskId),
+       dueDay = Value(dueDay),
+       dueMinute = Value(dueMinute),
+       state = Value(state);
+  static Insertable<ReminderRegistration> custom({
+    Expression<int>? notificationId,
+    Expression<String>? taskId,
+    Expression<int>? dueDay,
+    Expression<int>? dueMinute,
+    Expression<String>? state,
+  }) {
+    return RawValuesInsertable({
+      if (notificationId != null) 'notification_id': notificationId,
+      if (taskId != null) 'task_id': taskId,
+      if (dueDay != null) 'due_day': dueDay,
+      if (dueMinute != null) 'due_minute': dueMinute,
+      if (state != null) 'state': state,
+    });
+  }
+
+  ReminderRegistrationsCompanion copyWith({
+    Value<int>? notificationId,
+    Value<String>? taskId,
+    Value<int>? dueDay,
+    Value<int>? dueMinute,
+    Value<String>? state,
+  }) {
+    return ReminderRegistrationsCompanion(
+      notificationId: notificationId ?? this.notificationId,
+      taskId: taskId ?? this.taskId,
+      dueDay: dueDay ?? this.dueDay,
+      dueMinute: dueMinute ?? this.dueMinute,
+      state: state ?? this.state,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (notificationId.present) {
+      map['notification_id'] = Variable<int>(notificationId.value);
+    }
+    if (taskId.present) {
+      map['task_id'] = Variable<String>(taskId.value);
+    }
+    if (dueDay.present) {
+      map['due_day'] = Variable<int>(dueDay.value);
+    }
+    if (dueMinute.present) {
+      map['due_minute'] = Variable<int>(dueMinute.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReminderRegistrationsCompanion(')
+          ..write('notificationId: $notificationId, ')
+          ..write('taskId: $taskId, ')
+          ..write('dueDay: $dueDay, ')
+          ..write('dueMinute: $dueMinute, ')
+          ..write('state: $state')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $AppSettingsEntriesTable extends AppSettingsEntries
     with TableInfo<$AppSettingsEntriesTable, StoredAppSettings> {
   @override
@@ -1179,7 +1542,7 @@ class $AppSettingsEntriesTable extends AppSettingsEntries
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'CHECK ("notifications_enabled" IN (0, 1))',
     ),
-    defaultValue: const Constant(true),
+    defaultValue: const Constant(false),
   );
   static const VerificationMeta _themeModeMeta = const VerificationMeta(
     'themeMode',
@@ -1517,6 +1880,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $TaskListsTable taskLists = $TaskListsTable(this);
   late final $TasksTable tasks = $TasksTable(this);
+  late final $ReminderRegistrationsTable reminderRegistrations =
+      $ReminderRegistrationsTable(this);
   late final $AppSettingsEntriesTable appSettingsEntries =
       $AppSettingsEntriesTable(this);
   late final Index tasksByListOrder = Index(
@@ -1538,6 +1903,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     taskLists,
     tasks,
+    reminderRegistrations,
     appSettingsEntries,
     tasksByListOrder,
     tasksByDueDay,
@@ -2504,6 +2870,233 @@ typedef $$TasksTableProcessedTableManager =
       StoredTask,
       PrefetchHooks Function({bool listId, bool parentId})
     >;
+typedef $$ReminderRegistrationsTableCreateCompanionBuilder =
+    ReminderRegistrationsCompanion Function({
+      Value<int> notificationId,
+      required String taskId,
+      required int dueDay,
+      required int dueMinute,
+      required String state,
+    });
+typedef $$ReminderRegistrationsTableUpdateCompanionBuilder =
+    ReminderRegistrationsCompanion Function({
+      Value<int> notificationId,
+      Value<String> taskId,
+      Value<int> dueDay,
+      Value<int> dueMinute,
+      Value<String> state,
+    });
+
+class $$ReminderRegistrationsTableFilterComposer
+    extends Composer<_$AppDatabase, $ReminderRegistrationsTable> {
+  $$ReminderRegistrationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get notificationId => $composableBuilder(
+    column: $table.notificationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get taskId => $composableBuilder(
+    column: $table.taskId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dueDay => $composableBuilder(
+    column: $table.dueDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dueMinute => $composableBuilder(
+    column: $table.dueMinute,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ReminderRegistrationsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReminderRegistrationsTable> {
+  $$ReminderRegistrationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get notificationId => $composableBuilder(
+    column: $table.notificationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get taskId => $composableBuilder(
+    column: $table.taskId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get dueDay => $composableBuilder(
+    column: $table.dueDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get dueMinute => $composableBuilder(
+    column: $table.dueMinute,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ReminderRegistrationsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReminderRegistrationsTable> {
+  $$ReminderRegistrationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get notificationId => $composableBuilder(
+    column: $table.notificationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get taskId =>
+      $composableBuilder(column: $table.taskId, builder: (column) => column);
+
+  GeneratedColumn<int> get dueDay =>
+      $composableBuilder(column: $table.dueDay, builder: (column) => column);
+
+  GeneratedColumn<int> get dueMinute =>
+      $composableBuilder(column: $table.dueMinute, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+}
+
+class $$ReminderRegistrationsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReminderRegistrationsTable,
+          ReminderRegistration,
+          $$ReminderRegistrationsTableFilterComposer,
+          $$ReminderRegistrationsTableOrderingComposer,
+          $$ReminderRegistrationsTableAnnotationComposer,
+          $$ReminderRegistrationsTableCreateCompanionBuilder,
+          $$ReminderRegistrationsTableUpdateCompanionBuilder,
+          (
+            ReminderRegistration,
+            BaseReferences<
+              _$AppDatabase,
+              $ReminderRegistrationsTable,
+              ReminderRegistration
+            >,
+          ),
+          ReminderRegistration,
+          PrefetchHooks Function()
+        > {
+  $$ReminderRegistrationsTableTableManager(
+    _$AppDatabase db,
+    $ReminderRegistrationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReminderRegistrationsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ReminderRegistrationsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ReminderRegistrationsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> notificationId = const Value.absent(),
+                Value<String> taskId = const Value.absent(),
+                Value<int> dueDay = const Value.absent(),
+                Value<int> dueMinute = const Value.absent(),
+                Value<String> state = const Value.absent(),
+              }) => ReminderRegistrationsCompanion(
+                notificationId: notificationId,
+                taskId: taskId,
+                dueDay: dueDay,
+                dueMinute: dueMinute,
+                state: state,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> notificationId = const Value.absent(),
+                required String taskId,
+                required int dueDay,
+                required int dueMinute,
+                required String state,
+              }) => ReminderRegistrationsCompanion.insert(
+                notificationId: notificationId,
+                taskId: taskId,
+                dueDay: dueDay,
+                dueMinute: dueMinute,
+                state: state,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $ReminderRegistrationsTable,
+                    ReminderRegistration
+                  >(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ReminderRegistrationsTable,
+                    ReminderRegistration
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ReminderRegistrationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReminderRegistrationsTable,
+      ReminderRegistration,
+      $$ReminderRegistrationsTableFilterComposer,
+      $$ReminderRegistrationsTableOrderingComposer,
+      $$ReminderRegistrationsTableAnnotationComposer,
+      $$ReminderRegistrationsTableCreateCompanionBuilder,
+      $$ReminderRegistrationsTableUpdateCompanionBuilder,
+      (
+        ReminderRegistration,
+        BaseReferences<
+          _$AppDatabase,
+          $ReminderRegistrationsTable,
+          ReminderRegistration
+        >,
+      ),
+      ReminderRegistration,
+      PrefetchHooks Function()
+    >;
 typedef $$AppSettingsEntriesTableCreateCompanionBuilder =
     AppSettingsEntriesCompanion Function({
       required String id,
@@ -2851,6 +3444,8 @@ class $AppDatabaseManager {
       $$TaskListsTableTableManager(_db, _db.taskLists);
   $$TasksTableTableManager get tasks =>
       $$TasksTableTableManager(_db, _db.tasks);
+  $$ReminderRegistrationsTableTableManager get reminderRegistrations =>
+      $$ReminderRegistrationsTableTableManager(_db, _db.reminderRegistrations);
   $$AppSettingsEntriesTableTableManager get appSettingsEntries =>
       $$AppSettingsEntriesTableTableManager(_db, _db.appSettingsEntries);
 }

@@ -18,7 +18,7 @@ final class AppSettings {
   static final defaults = AppSettings(
     defaultListId: ListId.inbox,
     showCompleted: true,
-    notificationsEnabled: true,
+    notificationsEnabled: false,
     themeMode: AppThemeMode.system,
   );
 }
