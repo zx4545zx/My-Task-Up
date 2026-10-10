@@ -17,6 +17,10 @@ final taskProvider = FutureProvider.family<Task?, TaskId>(
   (ref, taskId) => ref.watch(taskRepositoryProvider).get(taskId),
 );
 
+final subtasksProvider = FutureProvider.family<List<Task>, TaskId>(
+  (ref, parentId) => ref.watch(taskRepositoryProvider).subtasksFor(parentId),
+);
+
 final selectedTaskIdProvider =
     NotifierProvider<SelectedTaskController, TaskId?>(
       SelectedTaskController.new,

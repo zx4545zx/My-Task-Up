@@ -15,11 +15,22 @@ final class TaskRepository {
 
   Future<List<Task>> forList(ListId listId) async =>
       (await (database.select(database.tasks)
-                ..where((task) => task.listId.equals(listId.value))
+                ..where(
+                  (task) =>
+                      task.listId.equals(listId.value) & task.parentId.isNull(),
+                )
                 ..orderBy([
                   (task) => OrderingTerm.asc(task.parentId),
                   (task) => OrderingTerm.asc(task.position),
                 ]))
+              .get())
+          .map(_fromRow)
+          .toList();
+
+  Future<List<Task>> subtasksFor(TaskId parentId) async =>
+      (await (database.select(database.tasks)
+                ..where((task) => task.parentId.equals(parentId.value))
+                ..orderBy([(task) => OrderingTerm.asc(task.position)]))
               .get())
           .map(_fromRow)
           .toList();
@@ -55,6 +66,115 @@ final class TaskRepository {
     );
     await save(task);
     return task;
+  }
+
+  Future<Task> createSubtask(TaskId parentId, String title) async {
+    final parent = await get(parentId);
+    if (parent == null || parent.parentId != null) {
+      throw StateError('Subtasks must belong to a top-level task.');
+    }
+    final siblings = await subtasksFor(parentId);
+    final now = DateTime.now();
+    final subtask = Task(
+      id: TaskId.newId(),
+      listId: parent.listId,
+      parentId: parentId,
+      title: TaskTitle(title),
+      repeat: const NeverRepeat(),
+      position: siblings.isEmpty ? 0 : siblings.last.position + 1,
+      createdAt: now,
+      updatedAt: now,
+    );
+    await save(subtask);
+    return subtask;
+  }
+
+  Future<void> reorderSiblings(
+    ListId listId,
+    TaskId? parentId,
+    List<TaskId> orderedIds,
+  ) => database.transaction(() async {
+    final siblings =
+        await (database.select(database.tasks)..where(
+              (task) =>
+                  task.listId.equals(listId.value) &
+                  (parentId == null
+                      ? task.parentId.isNull()
+                      : task.parentId.equals(parentId.value)),
+            ))
+            .get();
+    final existingIds = siblings.map((task) => task.id).toSet();
+    final requestedIds = orderedIds.map((id) => id.value).toSet();
+    if (orderedIds.length != siblings.length ||
+        requestedIds.length != siblings.length ||
+        requestedIds.difference(existingIds).isNotEmpty ||
+        existingIds.difference(requestedIds).isNotEmpty) {
+      throw StateError('Reordering must include every sibling exactly once.');
+    }
+    final now = DateTime.now().millisecondsSinceEpoch;
+    for (var index = 0; index < orderedIds.length; index++) {
+      await (database.update(database.tasks)
+            ..where((task) => task.id.equals(orderedIds[index].value)))
+          .write(TasksCompanion(position: Value(index), updatedAt: Value(now)));
+    }
+  });
+
+  Future<Task> moveToList(TaskId id, ListId destination) async {
+    Task? moved;
+    await database.transaction(() async {
+      final selected = await (database.select(
+        database.tasks,
+      )..where((task) => task.id.equals(id.value))).getSingleOrNull();
+      if (selected == null) throw StateError('Task does not exist.');
+      final destinationList = await (database.select(
+        database.taskLists,
+      )..where((list) => list.id.equals(destination.value))).getSingleOrNull();
+      if (destinationList == null) {
+        throw StateError('Task list does not exist.');
+      }
+      if (selected.listId == destination.value) {
+        moved = _fromRow(selected);
+        return;
+      }
+
+      final rootId = selected.parentId ?? id.value;
+      final root = await (database.select(
+        database.tasks,
+      )..where((task) => task.id.equals(rootId))).getSingle();
+      if (root.parentId != null) {
+        throw StateError('Invalid parent relationship.');
+      }
+      final lastTask =
+          await (database.select(database.tasks)
+                ..where(
+                  (task) =>
+                      task.listId.equals(destination.value) &
+                      task.parentId.isNull(),
+                )
+                ..orderBy([(task) => OrderingTerm.desc(task.position)])
+                ..limit(1))
+              .getSingleOrNull();
+      final now = DateTime.now().millisecondsSinceEpoch;
+      await (database.update(
+        database.tasks,
+      )..where((task) => task.id.equals(rootId))).write(
+        TasksCompanion(
+          listId: Value(destination.value),
+          position: Value((lastTask?.position ?? -1) + 1),
+          updatedAt: Value(now),
+        ),
+      );
+      await (database.update(
+        database.tasks,
+      )..where((task) => task.parentId.equals(rootId))).write(
+        TasksCompanion(listId: Value(destination.value), updatedAt: Value(now)),
+      );
+      final refreshed = await (database.select(
+        database.tasks,
+      )..where((task) => task.id.equals(id.value))).getSingle();
+      moved = _fromRow(refreshed);
+    });
+    return moved!;
   }
 
   Future<Task> edit(

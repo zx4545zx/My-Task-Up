@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_task_up/core/database/app_database.dart';
 import 'package:my_task_up/core/domain/ids.dart';
+import 'package:my_task_up/features/lists/list_repository.dart';
 import 'package:my_task_up/features/tasks/task_repository.dart';
 
 void main() {
@@ -59,4 +60,79 @@ void main() {
       expect(await tasks.get(duplicate.id), isNotNull);
     },
   );
+
+  test('creates single-level subtasks and rejects nested subtasks', () async {
+    final parent = await tasks.create(title: 'Plan trip');
+    final child = await tasks.createSubtask(parent.id, 'Book flights');
+
+    expect(child.parentId, parent.id);
+    expect(child.listId, parent.listId);
+    expect((await tasks.subtasksFor(parent.id)).map((task) => task.id), [
+      child.id,
+    ]);
+    await expectLater(
+      tasks.createSubtask(child.id, 'Choose seats'),
+      throwsA(isA<StateError>()),
+    );
+  });
+
+  test('reorders all and only the requested siblings', () async {
+    final first = await tasks.create(title: 'First');
+    final second = await tasks.create(title: 'Second');
+    final third = await tasks.create(title: 'Third');
+
+    await tasks.reorderSiblings(ListId.inbox, null, [
+      third.id,
+      first.id,
+      second.id,
+    ]);
+    expect((await tasks.forList(ListId.inbox)).map((task) => task.id), [
+      third.id,
+      first.id,
+      second.id,
+    ]);
+    await expectLater(
+      tasks.reorderSiblings(ListId.inbox, null, [
+        first.id,
+        first.id,
+        second.id,
+      ]),
+      throwsA(isA<StateError>()),
+    );
+    expect((await tasks.forList(ListId.inbox)).map((task) => task.id), [
+      third.id,
+      first.id,
+      second.id,
+    ]);
+
+    final childA = await tasks.createSubtask(first.id, 'A');
+    final childB = await tasks.createSubtask(first.id, 'B');
+    await tasks.reorderSiblings(ListId.inbox, first.id, [childB.id, childA.id]);
+    expect((await tasks.subtasksFor(first.id)).map((task) => task.id), [
+      childB.id,
+      childA.id,
+    ]);
+  });
+
+  test('moving a subtask moves its parent group together', () async {
+    final destination = await ListRepository(database).create('Later');
+    final parent = await tasks.create(title: 'Plan trip');
+    final child = await tasks.createSubtask(parent.id, 'Book flights');
+    final otherChild = await tasks.createSubtask(parent.id, 'Reserve hotel');
+
+    final moved = await tasks.moveToList(child.id, destination.id);
+
+    expect(moved.listId, destination.id);
+    expect(moved.parentId, parent.id);
+    expect((await tasks.get(parent.id))!.listId, destination.id);
+    expect((await tasks.get(otherChild.id))!.listId, destination.id);
+    expect(await tasks.forList(ListId.inbox), isEmpty);
+    expect((await tasks.forList(destination.id)).map((task) => task.id), [
+      parent.id,
+    ]);
+    expect((await tasks.subtasksFor(parent.id)).map((task) => task.id), [
+      child.id,
+      otherChild.id,
+    ]);
+  });
 }

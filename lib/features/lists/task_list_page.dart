@@ -66,9 +66,12 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
                         const Center(child: Text('Tasks could not be loaded.')),
                     data: (items) => items.isEmpty
                         ? const Center(child: Text('No tasks yet.'))
-                        : ListView.builder(
+                        : ReorderableListView.builder(
+                            buildDefaultDragHandles: true,
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             itemCount: items.length,
+                            onReorderItem: (oldIndex, newIndex) =>
+                                _reorderTasks(items, oldIndex, newIndex),
                             itemBuilder: (context, index) {
                               final task = items[index];
                               return ListTile(
@@ -93,27 +96,6 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
                                     ref.watch(selectedTaskIdProvider) ==
                                     task.id,
                                 onTap: () => _openTask(task.id),
-                                trailing: PopupMenuButton<_TaskAction>(
-                                  tooltip: 'Task actions',
-                                  onSelected: (action) {
-                                    switch (action) {
-                                      case _TaskAction.duplicate:
-                                        _duplicateTask(task.id);
-                                      case _TaskAction.delete:
-                                        _deleteTask(task.id);
-                                    }
-                                  },
-                                  itemBuilder: (context) => const [
-                                    PopupMenuItem(
-                                      value: _TaskAction.duplicate,
-                                      child: Text('Duplicate'),
-                                    ),
-                                    PopupMenuItem(
-                                      value: _TaskAction.delete,
-                                      child: Text('Delete'),
-                                    ),
-                                  ],
-                                ),
                               );
                             },
                           ),
@@ -170,43 +152,27 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
     }
   }
 
-  Future<void> _duplicateTask(TaskId id) async {
+  Future<void> _reorderTasks(
+    List<Task> tasks,
+    int oldIndex,
+    int newIndex,
+  ) async {
+    if (newIndex == oldIndex) return;
+    final reordered = tasks.toList();
+    final task = reordered.removeAt(oldIndex);
+    reordered.insert(newIndex, task);
     try {
-      final task = await ref.read(taskRepositoryProvider).duplicate(id);
+      await ref
+          .read(taskRepositoryProvider)
+          .reorderSiblings(
+            widget.listId,
+            null,
+            reordered.map((item) => item.id).toList(),
+          );
       ref.invalidate(tasksForListProvider(widget.listId));
-      ref.read(selectedTaskIdProvider.notifier).select(task.id);
     } catch (error) {
-      debugPrint('Could not duplicate task: $error');
-      if (mounted) _showError('Could not duplicate the task.');
-    }
-  }
-
-  Future<void> _deleteTask(TaskId id) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete task?'),
-        content: const Text('This task will be permanently deleted.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-    try {
-      await ref.read(taskRepositoryProvider).delete(id);
-      ref.invalidate(tasksForListProvider(widget.listId));
-      ref.read(selectedTaskIdProvider.notifier).select(null);
-    } catch (error) {
-      debugPrint('Could not delete task: $error');
-      if (mounted) _showError('Could not delete the task.');
+      debugPrint('Could not reorder tasks: $error');
+      if (mounted) _showError('Could not reorder tasks.');
     }
   }
 
@@ -216,5 +182,3 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
-
-enum _TaskAction { duplicate, delete }
