@@ -152,6 +152,30 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
     subtitle: task.notes == null ? null : Text(task.notes!),
     selected: ref.watch(selectedTaskIdProvider) == task.id,
     onTap: () => _openTask(task.id),
+    trailing: PopupMenuButton<_TaskAction>(
+      tooltip: 'Task actions',
+      onSelected: (action) {
+        switch (action) {
+          case _TaskAction.toggle:
+            _toggleTask(task);
+          case _TaskAction.duplicate:
+            _duplicateTask(task);
+          case _TaskAction.delete:
+            _deleteTask(task);
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: _TaskAction.toggle,
+          child: Text(task.isCompleted ? 'Restore' : 'Complete'),
+        ),
+        const PopupMenuItem(
+          value: _TaskAction.duplicate,
+          child: Text('Duplicate'),
+        ),
+        const PopupMenuItem(value: _TaskAction.delete, child: Text('Delete')),
+      ],
+    ),
   );
 
   Future<void> _toggleTask(Task task) async {
@@ -211,9 +235,53 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
     }
   }
 
+  Future<void> _duplicateTask(Task task) async {
+    try {
+      final duplicate = await ref
+          .read(taskRepositoryProvider)
+          .duplicate(task.id);
+      ref.read(selectedTaskIdProvider.notifier).select(duplicate.id);
+    } catch (error) {
+      debugPrint('Could not duplicate task: $error');
+      if (mounted) _showError('Could not duplicate the task.');
+    }
+  }
+
+  Future<void> _deleteTask(Task task) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete task?'),
+        content: Text('Delete “${task.title.value}” permanently?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await ref.read(taskRepositoryProvider).delete(task.id);
+      if (ref.read(selectedTaskIdProvider) == task.id) {
+        ref.read(selectedTaskIdProvider.notifier).select(null);
+      }
+    } catch (error) {
+      debugPrint('Could not delete task: $error');
+      if (mounted) _showError('Could not delete the task.');
+    }
+  }
+
   void _showError(String message) {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
+
+enum _TaskAction { toggle, duplicate, delete }

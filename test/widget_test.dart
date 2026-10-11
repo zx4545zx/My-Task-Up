@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -135,6 +136,125 @@ void main() {
     );
   });
 
+  testWidgets('desktop shortcuts create and toggle tasks safely', (
+    tester,
+  ) async {
+    final database = await _pumpApp(tester, 1400);
+    final tasks = TaskRepository(database);
+    final quickAdd = find.byType(TextField).first;
+    await tester.enterText(quickAdd, 'typed normally');
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+    await tester.pumpAndSettle();
+    expect(find.text('New task'), findsNothing);
+    expect(
+      tester.widget<TextField>(quickAdd).controller!.text,
+      'typed normally',
+    );
+
+    await _sendShortcut(
+      tester,
+      LogicalKeyboardKey.controlLeft,
+      LogicalKeyboardKey.keyN,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('New task'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).last, 'Shortcut task');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Shortcut task').first);
+    FocusManager.instance.primaryFocus?.unfocus();
+    await _sendShortcut(
+      tester,
+      LogicalKeyboardKey.controlLeft,
+      LogicalKeyboardKey.enter,
+    );
+    await tester.pumpAndSettle();
+    final task = (await tasks.all()).singleWhere(
+      (item) => item.title.value == 'Shortcut task',
+    );
+    expect(task.isCompleted, isTrue);
+    await _sendShortcut(
+      tester,
+      LogicalKeyboardKey.controlLeft,
+      LogicalKeyboardKey.keyK,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Search tasks and notes'), findsOneWidget);
+  });
+
+  testWidgets('desktop list actions reorder custom lists', (tester) async {
+    final database = await _pumpApp(tester, 1400);
+    final repository = ListRepository(database);
+
+    Future<void> addList(String name) async {
+      await tester.tap(find.text('Add list').first);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).last, name);
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+    }
+
+    await addList('Alpha');
+    await addList('Beta');
+    final lists = (await repository.all())
+        .where((list) => !list.isInbox)
+        .toList();
+    expect(lists.map((list) => list.name), ['Alpha', 'Beta']);
+
+    expect(find.byIcon(Icons.drag_indicator), findsNWidgets(2));
+    await tester.tap(find.byTooltip('List actions').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Move down'));
+    await tester.pumpAndSettle();
+
+    expect(
+      (await repository.all())
+          .where((list) => !list.isInbox)
+          .map((list) => list.name),
+      ['Beta', 'Alpha'],
+    );
+  });
+
+  testWidgets('task action menu can duplicate a task', (tester) async {
+    final database = await _pumpApp(tester, 1400);
+    final tasks = TaskRepository(database);
+    await tester.enterText(find.byType(TextField).first, 'Menu task');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Task actions').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Duplicate'));
+    await tester.pumpAndSettle();
+    expect(
+      (await tasks.all()).where((task) => task.title.value == 'Menu task'),
+      hasLength(2),
+    );
+  });
+
+  testWidgets('Delete shortcut asks before deleting a selected task', (
+    tester,
+  ) async {
+    final database = await _pumpApp(tester, 1400);
+    final tasks = TaskRepository(database);
+    await tester.enterText(find.byType(TextField).first, 'Delete by shortcut');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    final task = (await tasks.all()).singleWhere(
+      (item) => item.title.value == 'Delete by shortcut',
+    );
+    await tester.tap(find.text('Delete by shortcut').last);
+    FocusManager.instance.primaryFocus?.unfocus();
+    await _sendShortcut(tester, LogicalKeyboardKey.delete, null);
+    await tester.pumpAndSettle();
+    expect(find.text('Delete task?'), findsOneWidget);
+    expect(await tasks.get(task.id), isNotNull);
+    await tester.tap(find.text('Delete').last);
+    await tester.pumpAndSettle();
+    expect(await tasks.get(task.id), isNull);
+  });
+
   testWidgets('delete all data requires confirmation', (tester) async {
     final database = await _pumpApp(tester, 900);
     final tasks = TaskRepository(database);
@@ -203,6 +323,21 @@ Future<AppDatabase> _pumpApp(WidgetTester tester, double width) async {
   );
   await tester.pump(const Duration(milliseconds: 300));
   return database;
+}
+
+Future<void> _sendShortcut(
+  WidgetTester tester,
+  LogicalKeyboardKey first,
+  LogicalKeyboardKey? second,
+) async {
+  if (second == null) {
+    await tester.sendKeyEvent(first);
+    return;
+  }
+  await tester.sendKeyDownEvent(first);
+  await tester.sendKeyDownEvent(second);
+  await tester.sendKeyUpEvent(second);
+  await tester.sendKeyUpEvent(first);
 }
 
 void _setWidth(WidgetTester tester, double width) {

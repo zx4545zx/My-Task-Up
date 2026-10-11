@@ -28,28 +28,41 @@ class ListNavigation extends ConsumerWidget {
           const Center(child: Text('Lists could not be loaded.')),
       data: (items) {
         final customLists = items.where((item) => !item.isInbox).toList();
-        return ListView(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          children: [
-            for (final destination in ShellDestination.values)
-              ListTile(
-                leading: Icon(destination.icon),
-                title: Text(destination.label),
-                selected: location == destination.path,
-                onTap: () => _go(context, destination.path),
+        return CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate.fixed([
+                  for (final destination in ShellDestination.values)
+                    ListTile(
+                      leading: Icon(destination.icon),
+                      title: Text(destination.label),
+                      selected: location == destination.path,
+                      onTap: () => _go(context, destination.path),
+                    ),
+                  if (customLists.isNotEmpty)
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(16, 20, 16, 4),
+                      child: Text('My lists'),
+                    ),
+                ]),
               ),
-            if (customLists.isNotEmpty) ...[
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 20, 16, 4),
-                child: Text('My lists'),
+            ),
+            if (customLists.isNotEmpty)
+              SliverReorderableList(
+                itemCount: customLists.length,
+                onReorderItem: (oldIndex, newIndex) =>
+                    _moveList(context, ref, customLists, oldIndex, newIndex),
+                itemBuilder: (context, index) =>
+                    _customListTile(context, ref, customLists, index),
               ),
-              for (var index = 0; index < customLists.length; index++)
-                _customListTile(context, ref, customLists, index),
-            ],
-            ListTile(
-              leading: const Icon(Icons.add),
-              title: const Text('Add list'),
-              onTap: () => _createList(context, ref),
+            SliverToBoxAdapter(
+              child: ListTile(
+                leading: const Icon(Icons.add),
+                title: const Text('Add list'),
+                onTap: () => _createList(context, ref),
+              ),
             ),
           ],
         );
@@ -64,39 +77,55 @@ class ListNavigation extends ConsumerWidget {
     int index,
   ) {
     final list = lists[index];
-    return ListTile(
-      leading: const Icon(Icons.list_alt_outlined),
-      title: Text(list.name),
-      selected: location == '/lists/${list.id.value}',
-      onTap: () => _go(context, '/lists/${list.id.value}'),
-      trailing: PopupMenuButton<_ListAction>(
-        tooltip: 'List actions',
-        onSelected: (action) {
-          switch (action) {
-            case _ListAction.moveUp:
-              _moveList(context, ref, lists, index, index - 1);
-            case _ListAction.moveDown:
-              _moveList(context, ref, lists, index, index + 1);
-            case _ListAction.rename:
-              _renameList(context, ref, list);
-            case _ListAction.delete:
-              _deleteList(context, ref, list);
-          }
-        },
-        itemBuilder: (context) => [
-          if (index > 0)
+    return Material(
+      key: ValueKey(list.id),
+      type: MaterialType.transparency,
+      child: ListTile(
+        leading: ReorderableDragStartListener(
+          index: index,
+          child: const Tooltip(
+            message: 'Reorder list',
+            child: Icon(Icons.drag_indicator),
+          ),
+        ),
+        title: Text(list.name),
+        selected: location == '/lists/${list.id.value}',
+        onTap: () => _go(context, '/lists/${list.id.value}'),
+        trailing: PopupMenuButton<_ListAction>(
+          tooltip: 'List actions',
+          onSelected: (action) {
+            switch (action) {
+              case _ListAction.moveUp:
+                _moveList(context, ref, lists, index, index - 1);
+              case _ListAction.moveDown:
+                _moveList(context, ref, lists, index, index + 1);
+              case _ListAction.rename:
+                _renameList(context, ref, list);
+              case _ListAction.delete:
+                _deleteList(context, ref, list);
+            }
+          },
+          itemBuilder: (context) => [
+            if (index > 0)
+              const PopupMenuItem(
+                value: _ListAction.moveUp,
+                child: Text('Move up'),
+              ),
+            if (index < lists.length - 1)
+              const PopupMenuItem(
+                value: _ListAction.moveDown,
+                child: Text('Move down'),
+              ),
             const PopupMenuItem(
-              value: _ListAction.moveUp,
-              child: Text('Move up'),
+              value: _ListAction.rename,
+              child: Text('Rename'),
             ),
-          if (index < lists.length - 1)
             const PopupMenuItem(
-              value: _ListAction.moveDown,
-              child: Text('Move down'),
+              value: _ListAction.delete,
+              child: Text('Delete'),
             ),
-          const PopupMenuItem(value: _ListAction.rename, child: Text('Rename')),
-          const PopupMenuItem(value: _ListAction.delete, child: Text('Delete')),
-        ],
+          ],
+        ),
       ),
     );
   }
