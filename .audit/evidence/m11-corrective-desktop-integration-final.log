@@ -1,0 +1,6 @@
+00:00 +0: loading /Users/syaco/workspace/my-project/.worktrees/My-Task-Up-mvp/integration_test/runtime_probe_test.dart
+Building macOS application...
+✓ Built build/macos/Build/Products/Debug/my_task_up.app
+00:00 +0: desktop drag and due-time save
+00:08 +1: (tearDownAll)
+00:08 +1: All tests passed!

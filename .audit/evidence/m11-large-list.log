@@ -1,0 +1,41 @@
+date=2026-10-10T23:28:21Z
+ 6:28  up 63 days, 11:04, 6 users, load averages: 0.98 1.26 1.36
+cores=16
+ 10.0 pi
+  8.9 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.98/Helpers/Google Chrome Helper (Renderer).app/Contents/MacOS/Google Chrome Helper (Renderer)
+  7.9 /Users/syaco/.hermes/tools/python-3.14.7+20260901-darwin-arm64/bin/python3
+  6.2 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer
+  6.1 /Users/syaco/Library/Android/sdk/emulator/qemu/darwin-aarch64/qemu-system-aarch64
+  5.5 /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+  4.3 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)
+  4.2 pi
+
+RUN 1
+00:00 +0: loading /Users/syaco/workspace/my-project/.worktrees/My-Task-Up-mvp/test/large_list_performance_test.dart
+00:00 +0: 5,000-task list builds only visible rows
+M11 large-list probe: tasks=5000, initialLoadMs=698, builtTiles=20
+00:01 +1: All tests passed!
+
+RUN 2
+00:00 +0: loading /Users/syaco/workspace/my-project/.worktrees/My-Task-Up-mvp/test/large_list_performance_test.dart
+00:00 +0: 5,000-task list builds only visible rows
+M11 large-list probe: tasks=5000, initialLoadMs=707, builtTiles=20
+00:01 +1: All tests passed!
+
+RUN 3
+00:00 +0: loading /Users/syaco/workspace/my-project/.worktrees/My-Task-Up-mvp/test/large_list_performance_test.dart
+00:00 +0: 5,000-task list builds only visible rows
+M11 large-list probe: tasks=5000, initialLoadMs=697, builtTiles=20
+00:01 +1: All tests passed!
+
+RUN 4
+00:00 +0: loading /Users/syaco/workspace/my-project/.worktrees/My-Task-Up-mvp/test/large_list_performance_test.dart
+00:00 +0: 5,000-task list builds only visible rows
+M11 large-list probe: tasks=5000, initialLoadMs=696, builtTiles=20
+00:01 +1: All tests passed!
+
+RUN 5
+00:00 +0: loading /Users/syaco/workspace/my-project/.worktrees/My-Task-Up-mvp/test/large_list_performance_test.dart
+00:00 +0: 5,000-task list builds only visible rows
+M11 large-list probe: tasks=5000, initialLoadMs=696, builtTiles=20
+00:01 +1: All tests passed!

@@ -1,0 +1,20 @@
+# M8 native runtime attempts
+
+## macOS
+
+- Built and launched `.app` from `build/macos/Build/Products/Release/my_task_up.app`.
+- Opened Settings and toggled Task reminders.
+- The app displayed `Notification permission was not granted.` No native delivery or cancellation was observed.
+- Orca screenshot evidence: `/var/folders/ny/0nkk3c9j47d3zy3vkm_6kk3w0000gn/T/orca-computer-use/ce21dcfc-6e77-46a7-b18c-52be1bae56be-screenshot.png` shows the app feedback. The OS permission state was not changed.
+
+## Android emulator
+
+- Booted AVD `Kiosk` on Android API 35 without accepting Android SDK licenses. Installed `build/app/outputs/flutter-apk/app-release.apk` and launched `com.example.my_task_up/.MainActivity`.
+- `adb shell dumpsys package com.example.my_task_up` initially reported `POST_NOTIFICATIONS: granted=false`.
+- Used the app Settings switch to show the Android notification permission prompt and allowed notifications. The app then opened the Android Alarms & reminders settings screen. Enabled that app-level exact-alarm permission and returned to the app. Settings showed Task reminders enabled.
+- Created a temporary task and attempted to set its due date and time through the app UI. The final observed task state was date-only (`Sun, Oct 11 · All day`), so it was not eligible for scheduling. No delivered or canceled reminder was observed.
+- Screen captures from this attempt are in `.audit/evidence/m8-android-screen.png`. The app ran in Flutter debug mode for the interaction, not as a user release installation.
+
+## Verdict
+
+Native startup and Android notification and exact-alarm permission prompts were exercised. Notification delivery and cancellation remain INCONCLUSIVE. The Android task did not retain a due time during the UI attempt, and macOS denied the permission request. Do not treat these attempts as proof of runtime delivery or cancellation.
