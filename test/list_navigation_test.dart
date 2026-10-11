@@ -9,6 +9,41 @@ import 'package:my_task_up/core/domain/ids.dart';
 import 'package:my_task_up/features/lists/list_repository.dart';
 
 void main() {
+  testWidgets('pointer drag reorders custom lists', (tester) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    await ListRepository(database).create('Alpha');
+    await ListRepository(database).create('Beta');
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1400, 1000);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWithValue(database)],
+        child: const MyTaskUpApp(),
+      ),
+    );
+    await _pumpAsync(tester);
+    final source = tester.getCenter(find.byTooltip('Reorder list').first);
+    final target = tester.getCenter(find.text('Beta'));
+    final gesture = await tester.startGesture(source);
+    await gesture.moveTo(source + Offset(0, 30));
+    await tester.pump(const Duration(milliseconds: 100));
+    await gesture.moveTo(target);
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await _pumpAsync(tester);
+
+    expect(
+      (await ListRepository(
+        database,
+      ).all()).where((list) => !list.isInbox).map((list) => list.name),
+      ['Beta', 'Alpha'],
+    );
+  });
+
   testWidgets('creates, renames, reorders, and deletes a custom list', (
     tester,
   ) async {

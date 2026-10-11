@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/domain/ids.dart';
@@ -510,6 +511,7 @@ class _TaskDetailsDialogState extends State<_TaskDetailsDialog> {
   @override
   void initState() {
     super.initState();
+    HardwareKeyboard.instance.addHandler(_handleKeyboard);
     titleController = TextEditingController(text: widget.task.title.value);
     notesController = TextEditingController(text: widget.task.notes ?? '');
     due = widget.task.due;
@@ -536,8 +538,29 @@ class _TaskDetailsDialogState extends State<_TaskDetailsDialog> {
     };
   }
 
+  bool _handleKeyboard(KeyEvent event) {
+    if (event is! KeyDownEvent ||
+        FocusManager.instance.primaryFocus?.context
+                ?.findAncestorStateOfType<_TaskDetailsDialogState>() !=
+            this) {
+      return false;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.enter &&
+        (HardwareKeyboard.instance.isControlPressed ||
+            HardwareKeyboard.instance.isMetaPressed)) {
+      _save();
+      return true;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.escape) {
+      Navigator.pop(context);
+      return true;
+    }
+    return false;
+  }
+
   @override
   void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleKeyboard);
     titleController.dispose();
     notesController.dispose();
     everyController.dispose();
@@ -644,13 +667,16 @@ class _TaskDetailsDialogState extends State<_TaskDetailsDialog> {
               TextField(
                 controller: titleController,
                 autofocus: true,
+                textInputAction: TextInputAction.done,
                 decoration: const InputDecoration(labelText: 'Title'),
+                onSubmitted: (_) => _save(),
               ),
               TextField(
                 controller: notesController,
                 minLines: 2,
                 maxLines: 5,
                 decoration: const InputDecoration(labelText: 'Notes'),
+                onSubmitted: (_) => _save(),
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,

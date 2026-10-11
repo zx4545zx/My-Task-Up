@@ -452,6 +452,28 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, StoredTask> {
       'REFERENCES tasks (id)',
     ),
   );
+  static const VerificationMeta _recurrenceSeriesIdMeta =
+      const VerificationMeta('recurrenceSeriesId');
+  @override
+  late final GeneratedColumn<String> recurrenceSeriesId =
+      GeneratedColumn<String>(
+        'recurrence_series_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _nextOccurrenceIdMeta = const VerificationMeta(
+    'nextOccurrenceId',
+  );
+  @override
+  late final GeneratedColumn<String> nextOccurrenceId = GeneratedColumn<String>(
+    'next_occurrence_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
@@ -551,6 +573,8 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, StoredTask> {
     id,
     listId,
     parentId,
+    recurrenceSeriesId,
+    nextOccurrenceId,
     title,
     notes,
     dueDay,
@@ -590,6 +614,24 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, StoredTask> {
       context.handle(
         _parentIdMeta,
         parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta),
+      );
+    }
+    if (data.containsKey('recurrence_series_id')) {
+      context.handle(
+        _recurrenceSeriesIdMeta,
+        recurrenceSeriesId.isAcceptableOrUnknown(
+          data['recurrence_series_id']!,
+          _recurrenceSeriesIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('next_occurrence_id')) {
+      context.handle(
+        _nextOccurrenceIdMeta,
+        nextOccurrenceId.isAcceptableOrUnknown(
+          data['next_occurrence_id']!,
+          _nextOccurrenceIdMeta,
+        ),
       );
     }
     if (data.containsKey('title')) {
@@ -678,6 +720,14 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, StoredTask> {
         DriftSqlType.string,
         data['${effectivePrefix}parent_id'],
       ),
+      recurrenceSeriesId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recurrence_series_id'],
+      ),
+      nextOccurrenceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}next_occurrence_id'],
+      ),
       title: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}title'],
@@ -727,6 +777,8 @@ class StoredTask extends DataClass implements Insertable<StoredTask> {
   final String id;
   final String listId;
   final String? parentId;
+  final String? recurrenceSeriesId;
+  final String? nextOccurrenceId;
   final String title;
   final String? notes;
   final int? dueDay;
@@ -740,6 +792,8 @@ class StoredTask extends DataClass implements Insertable<StoredTask> {
     required this.id,
     required this.listId,
     this.parentId,
+    this.recurrenceSeriesId,
+    this.nextOccurrenceId,
     required this.title,
     this.notes,
     this.dueDay,
@@ -757,6 +811,12 @@ class StoredTask extends DataClass implements Insertable<StoredTask> {
     map['list_id'] = Variable<String>(listId);
     if (!nullToAbsent || parentId != null) {
       map['parent_id'] = Variable<String>(parentId);
+    }
+    if (!nullToAbsent || recurrenceSeriesId != null) {
+      map['recurrence_series_id'] = Variable<String>(recurrenceSeriesId);
+    }
+    if (!nullToAbsent || nextOccurrenceId != null) {
+      map['next_occurrence_id'] = Variable<String>(nextOccurrenceId);
     }
     map['title'] = Variable<String>(title);
     if (!nullToAbsent || notes != null) {
@@ -785,6 +845,12 @@ class StoredTask extends DataClass implements Insertable<StoredTask> {
       parentId: parentId == null && nullToAbsent
           ? const Value.absent()
           : Value(parentId),
+      recurrenceSeriesId: recurrenceSeriesId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(recurrenceSeriesId),
+      nextOccurrenceId: nextOccurrenceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextOccurrenceId),
       title: Value(title),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
@@ -814,6 +880,10 @@ class StoredTask extends DataClass implements Insertable<StoredTask> {
       id: serializer.fromJson<String>(json['id']),
       listId: serializer.fromJson<String>(json['listId']),
       parentId: serializer.fromJson<String?>(json['parentId']),
+      recurrenceSeriesId: serializer.fromJson<String?>(
+        json['recurrenceSeriesId'],
+      ),
+      nextOccurrenceId: serializer.fromJson<String?>(json['nextOccurrenceId']),
       title: serializer.fromJson<String>(json['title']),
       notes: serializer.fromJson<String?>(json['notes']),
       dueDay: serializer.fromJson<int?>(json['dueDay']),
@@ -832,6 +902,8 @@ class StoredTask extends DataClass implements Insertable<StoredTask> {
       'id': serializer.toJson<String>(id),
       'listId': serializer.toJson<String>(listId),
       'parentId': serializer.toJson<String?>(parentId),
+      'recurrenceSeriesId': serializer.toJson<String?>(recurrenceSeriesId),
+      'nextOccurrenceId': serializer.toJson<String?>(nextOccurrenceId),
       'title': serializer.toJson<String>(title),
       'notes': serializer.toJson<String?>(notes),
       'dueDay': serializer.toJson<int?>(dueDay),
@@ -848,6 +920,8 @@ class StoredTask extends DataClass implements Insertable<StoredTask> {
     String? id,
     String? listId,
     Value<String?> parentId = const Value.absent(),
+    Value<String?> recurrenceSeriesId = const Value.absent(),
+    Value<String?> nextOccurrenceId = const Value.absent(),
     String? title,
     Value<String?> notes = const Value.absent(),
     Value<int?> dueDay = const Value.absent(),
@@ -861,6 +935,12 @@ class StoredTask extends DataClass implements Insertable<StoredTask> {
     id: id ?? this.id,
     listId: listId ?? this.listId,
     parentId: parentId.present ? parentId.value : this.parentId,
+    recurrenceSeriesId: recurrenceSeriesId.present
+        ? recurrenceSeriesId.value
+        : this.recurrenceSeriesId,
+    nextOccurrenceId: nextOccurrenceId.present
+        ? nextOccurrenceId.value
+        : this.nextOccurrenceId,
     title: title ?? this.title,
     notes: notes.present ? notes.value : this.notes,
     dueDay: dueDay.present ? dueDay.value : this.dueDay,
@@ -876,6 +956,12 @@ class StoredTask extends DataClass implements Insertable<StoredTask> {
       id: data.id.present ? data.id.value : this.id,
       listId: data.listId.present ? data.listId.value : this.listId,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
+      recurrenceSeriesId: data.recurrenceSeriesId.present
+          ? data.recurrenceSeriesId.value
+          : this.recurrenceSeriesId,
+      nextOccurrenceId: data.nextOccurrenceId.present
+          ? data.nextOccurrenceId.value
+          : this.nextOccurrenceId,
       title: data.title.present ? data.title.value : this.title,
       notes: data.notes.present ? data.notes.value : this.notes,
       dueDay: data.dueDay.present ? data.dueDay.value : this.dueDay,
@@ -898,6 +984,8 @@ class StoredTask extends DataClass implements Insertable<StoredTask> {
           ..write('id: $id, ')
           ..write('listId: $listId, ')
           ..write('parentId: $parentId, ')
+          ..write('recurrenceSeriesId: $recurrenceSeriesId, ')
+          ..write('nextOccurrenceId: $nextOccurrenceId, ')
           ..write('title: $title, ')
           ..write('notes: $notes, ')
           ..write('dueDay: $dueDay, ')
@@ -916,6 +1004,8 @@ class StoredTask extends DataClass implements Insertable<StoredTask> {
     id,
     listId,
     parentId,
+    recurrenceSeriesId,
+    nextOccurrenceId,
     title,
     notes,
     dueDay,
@@ -933,6 +1023,8 @@ class StoredTask extends DataClass implements Insertable<StoredTask> {
           other.id == this.id &&
           other.listId == this.listId &&
           other.parentId == this.parentId &&
+          other.recurrenceSeriesId == this.recurrenceSeriesId &&
+          other.nextOccurrenceId == this.nextOccurrenceId &&
           other.title == this.title &&
           other.notes == this.notes &&
           other.dueDay == this.dueDay &&
@@ -948,6 +1040,8 @@ class TasksCompanion extends UpdateCompanion<StoredTask> {
   final Value<String> id;
   final Value<String> listId;
   final Value<String?> parentId;
+  final Value<String?> recurrenceSeriesId;
+  final Value<String?> nextOccurrenceId;
   final Value<String> title;
   final Value<String?> notes;
   final Value<int?> dueDay;
@@ -962,6 +1056,8 @@ class TasksCompanion extends UpdateCompanion<StoredTask> {
     this.id = const Value.absent(),
     this.listId = const Value.absent(),
     this.parentId = const Value.absent(),
+    this.recurrenceSeriesId = const Value.absent(),
+    this.nextOccurrenceId = const Value.absent(),
     this.title = const Value.absent(),
     this.notes = const Value.absent(),
     this.dueDay = const Value.absent(),
@@ -977,6 +1073,8 @@ class TasksCompanion extends UpdateCompanion<StoredTask> {
     required String id,
     required String listId,
     this.parentId = const Value.absent(),
+    this.recurrenceSeriesId = const Value.absent(),
+    this.nextOccurrenceId = const Value.absent(),
     required String title,
     this.notes = const Value.absent(),
     this.dueDay = const Value.absent(),
@@ -997,6 +1095,8 @@ class TasksCompanion extends UpdateCompanion<StoredTask> {
     Expression<String>? id,
     Expression<String>? listId,
     Expression<String>? parentId,
+    Expression<String>? recurrenceSeriesId,
+    Expression<String>? nextOccurrenceId,
     Expression<String>? title,
     Expression<String>? notes,
     Expression<int>? dueDay,
@@ -1012,6 +1112,9 @@ class TasksCompanion extends UpdateCompanion<StoredTask> {
       if (id != null) 'id': id,
       if (listId != null) 'list_id': listId,
       if (parentId != null) 'parent_id': parentId,
+      if (recurrenceSeriesId != null)
+        'recurrence_series_id': recurrenceSeriesId,
+      if (nextOccurrenceId != null) 'next_occurrence_id': nextOccurrenceId,
       if (title != null) 'title': title,
       if (notes != null) 'notes': notes,
       if (dueDay != null) 'due_day': dueDay,
@@ -1029,6 +1132,8 @@ class TasksCompanion extends UpdateCompanion<StoredTask> {
     Value<String>? id,
     Value<String>? listId,
     Value<String?>? parentId,
+    Value<String?>? recurrenceSeriesId,
+    Value<String?>? nextOccurrenceId,
     Value<String>? title,
     Value<String?>? notes,
     Value<int?>? dueDay,
@@ -1044,6 +1149,8 @@ class TasksCompanion extends UpdateCompanion<StoredTask> {
       id: id ?? this.id,
       listId: listId ?? this.listId,
       parentId: parentId ?? this.parentId,
+      recurrenceSeriesId: recurrenceSeriesId ?? this.recurrenceSeriesId,
+      nextOccurrenceId: nextOccurrenceId ?? this.nextOccurrenceId,
       title: title ?? this.title,
       notes: notes ?? this.notes,
       dueDay: dueDay ?? this.dueDay,
@@ -1068,6 +1175,12 @@ class TasksCompanion extends UpdateCompanion<StoredTask> {
     }
     if (parentId.present) {
       map['parent_id'] = Variable<String>(parentId.value);
+    }
+    if (recurrenceSeriesId.present) {
+      map['recurrence_series_id'] = Variable<String>(recurrenceSeriesId.value);
+    }
+    if (nextOccurrenceId.present) {
+      map['next_occurrence_id'] = Variable<String>(nextOccurrenceId.value);
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
@@ -1108,6 +1221,8 @@ class TasksCompanion extends UpdateCompanion<StoredTask> {
           ..write('id: $id, ')
           ..write('listId: $listId, ')
           ..write('parentId: $parentId, ')
+          ..write('recurrenceSeriesId: $recurrenceSeriesId, ')
+          ..write('nextOccurrenceId: $nextOccurrenceId, ')
           ..write('title: $title, ')
           ..write('notes: $notes, ')
           ..write('dueDay: $dueDay, ')
@@ -2336,6 +2451,8 @@ typedef $$TasksTableCreateCompanionBuilder =
       required String id,
       required String listId,
       Value<String?> parentId,
+      Value<String?> recurrenceSeriesId,
+      Value<String?> nextOccurrenceId,
       required String title,
       Value<String?> notes,
       Value<int?> dueDay,
@@ -2352,6 +2469,8 @@ typedef $$TasksTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> listId,
       Value<String?> parentId,
+      Value<String?> recurrenceSeriesId,
+      Value<String?> nextOccurrenceId,
       Value<String> title,
       Value<String?> notes,
       Value<int?> dueDay,
@@ -2413,6 +2532,16 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recurrenceSeriesId => $composableBuilder(
+    column: $table.recurrenceSeriesId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nextOccurrenceId => $composableBuilder(
+    column: $table.nextOccurrenceId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2522,6 +2651,16 @@ class $$TasksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get recurrenceSeriesId => $composableBuilder(
+    column: $table.recurrenceSeriesId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nextOccurrenceId => $composableBuilder(
+    column: $table.nextOccurrenceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get title => $composableBuilder(
     column: $table.title,
     builder: (column) => ColumnOrderings(column),
@@ -2625,6 +2764,16 @@ class $$TasksTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get recurrenceSeriesId => $composableBuilder(
+    column: $table.recurrenceSeriesId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get nextOccurrenceId => $composableBuilder(
+    column: $table.nextOccurrenceId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
@@ -2735,6 +2884,8 @@ class $$TasksTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> listId = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
+                Value<String?> recurrenceSeriesId = const Value.absent(),
+                Value<String?> nextOccurrenceId = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int?> dueDay = const Value.absent(),
@@ -2749,6 +2900,8 @@ class $$TasksTableTableManager
                 id: id,
                 listId: listId,
                 parentId: parentId,
+                recurrenceSeriesId: recurrenceSeriesId,
+                nextOccurrenceId: nextOccurrenceId,
                 title: title,
                 notes: notes,
                 dueDay: dueDay,
@@ -2765,6 +2918,8 @@ class $$TasksTableTableManager
                 required String id,
                 required String listId,
                 Value<String?> parentId = const Value.absent(),
+                Value<String?> recurrenceSeriesId = const Value.absent(),
+                Value<String?> nextOccurrenceId = const Value.absent(),
                 required String title,
                 Value<String?> notes = const Value.absent(),
                 Value<int?> dueDay = const Value.absent(),
@@ -2779,6 +2934,8 @@ class $$TasksTableTableManager
                 id: id,
                 listId: listId,
                 parentId: parentId,
+                recurrenceSeriesId: recurrenceSeriesId,
+                nextOccurrenceId: nextOccurrenceId,
                 title: title,
                 notes: notes,
                 dueDay: dueDay,

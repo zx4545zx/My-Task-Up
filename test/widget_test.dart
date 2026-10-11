@@ -136,7 +136,7 @@ void main() {
     );
   });
 
-  testWidgets('desktop shortcuts create and toggle tasks safely', (
+  testWidgets('desktop shortcuts save tasks without changing completion', (
     tester,
   ) async {
     final database = await _pumpApp(tester, 1400);
@@ -159,21 +159,57 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('New task'), findsOneWidget);
     await tester.enterText(find.byType(TextField).last, 'Shortcut task');
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Shortcut task').first);
-    FocusManager.instance.primaryFocus?.unfocus();
     await _sendShortcut(
       tester,
       LogicalKeyboardKey.controlLeft,
       LogicalKeyboardKey.enter,
     );
     await tester.pumpAndSettle();
-    final task = (await tasks.all()).singleWhere(
+    expect(await tasks.search('Shortcut task'), hasLength(1));
+
+    await _sendShortcut(
+      tester,
+      LogicalKeyboardKey.controlLeft,
+      LogicalKeyboardKey.keyN,
+    );
+    await tester.pumpAndSettle();
+    await _sendShortcut(tester, LogicalKeyboardKey.escape, null);
+    await tester.pumpAndSettle();
+    expect(find.text('New task'), findsNothing);
+    expect(await tasks.all(), hasLength(1));
+
+    var task = (await tasks.all()).singleWhere(
       (item) => item.title.value == 'Shortcut task',
     );
-    expect(task.isCompleted, isTrue);
+    expect(task.isCompleted, isFalse);
+
+    await tester.tap(find.text('Shortcut task').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find
+          .descendant(
+            of: find.byType(AlertDialog),
+            matching: find.byType(TextField),
+          )
+          .first,
+      'Saved by shortcut',
+    );
+    await _sendShortcut(
+      tester,
+      LogicalKeyboardKey.controlLeft,
+      LogicalKeyboardKey.enter,
+    );
+    await tester.pumpAndSettle();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    task = (await tasks.all()).singleWhere((item) => item.id == task.id);
+    expect(task.title.value, 'Saved by shortcut');
+    expect(task.isCompleted, isFalse);
+
     await _sendShortcut(
       tester,
       LogicalKeyboardKey.controlLeft,
@@ -214,6 +250,44 @@ void main() {
           .map((list) => list.name),
       ['Beta', 'Alpha'],
     );
+  });
+
+  testWidgets('pointer drag moves a root task and its subtasks to a list', (
+    tester,
+  ) async {
+    _setWidth(tester, 1400);
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final later = await ListRepository(database).create('Later');
+    final tasks = TaskRepository(database);
+    final parent = await tasks.create(title: 'Move this group');
+    final child = await tasks.createSubtask(parent.id, 'Keep this subtask');
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWithValue(database)],
+        child: const MyTaskUpApp(),
+      ),
+    );
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final source = tester.getCenter(find.byTooltip('Move task to list'));
+    final target = tester.getCenter(find.text('Later'));
+    final gesture = await tester.startGesture(source);
+    await gesture.moveTo(target);
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect((await tasks.get(parent.id))!.listId, later.id);
+    expect((await tasks.get(child.id))!.listId, later.id);
+    expect((await tasks.get(child.id))!.parentId, parent.id);
   });
 
   testWidgets('task action menu can duplicate a task', (tester) async {

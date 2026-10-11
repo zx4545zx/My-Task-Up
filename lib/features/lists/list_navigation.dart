@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/domain/ids.dart';
+import '../../core/domain/task.dart';
 import '../../core/domain/task_list.dart';
 import '../navigation/shell_destination.dart';
 import '../settings/settings_providers.dart';
@@ -35,11 +37,18 @@ class ListNavigation extends ConsumerWidget {
               sliver: SliverList(
                 delegate: SliverChildListDelegate.fixed([
                   for (final destination in ShellDestination.values)
-                    ListTile(
-                      leading: Icon(destination.icon),
-                      title: Text(destination.label),
-                      selected: location == destination.path,
-                      onTap: () => _go(context, destination.path),
+                    _taskDropTarget(
+                      context,
+                      ref,
+                      destination == ShellDestination.inbox
+                          ? ListId.inbox
+                          : null,
+                      ListTile(
+                        leading: Icon(destination.icon),
+                        title: Text(destination.label),
+                        selected: location == destination.path,
+                        onTap: () => _go(context, destination.path),
+                      ),
                     ),
                   if (customLists.isNotEmpty)
                     const Padding(
@@ -80,54 +89,95 @@ class ListNavigation extends ConsumerWidget {
     return Material(
       key: ValueKey(list.id),
       type: MaterialType.transparency,
-      child: ListTile(
-        leading: ReorderableDragStartListener(
-          index: index,
-          child: const Tooltip(
-            message: 'Reorder list',
-            child: Icon(Icons.drag_indicator),
+      child: _taskDropTarget(
+        context,
+        ref,
+        list.id,
+        ListTile(
+          leading: ReorderableDragStartListener(
+            index: index,
+            child: const Tooltip(
+              message: 'Reorder list',
+              child: Icon(Icons.drag_indicator),
+            ),
           ),
-        ),
-        title: Text(list.name),
-        selected: location == '/lists/${list.id.value}',
-        onTap: () => _go(context, '/lists/${list.id.value}'),
-        trailing: PopupMenuButton<_ListAction>(
-          tooltip: 'List actions',
-          onSelected: (action) {
-            switch (action) {
-              case _ListAction.moveUp:
-                _moveList(context, ref, lists, index, index - 1);
-              case _ListAction.moveDown:
-                _moveList(context, ref, lists, index, index + 1);
-              case _ListAction.rename:
-                _renameList(context, ref, list);
-              case _ListAction.delete:
-                _deleteList(context, ref, list);
-            }
-          },
-          itemBuilder: (context) => [
-            if (index > 0)
+          title: Text(list.name),
+          selected: location == '/lists/${list.id.value}',
+          onTap: () => _go(context, '/lists/${list.id.value}'),
+          trailing: PopupMenuButton<_ListAction>(
+            tooltip: 'List actions',
+            onSelected: (action) {
+              switch (action) {
+                case _ListAction.moveUp:
+                  _moveList(context, ref, lists, index, index - 1);
+                case _ListAction.moveDown:
+                  _moveList(context, ref, lists, index, index + 1);
+                case _ListAction.rename:
+                  _renameList(context, ref, list);
+                case _ListAction.delete:
+                  _deleteList(context, ref, list);
+              }
+            },
+            itemBuilder: (context) => [
+              if (index > 0)
+                const PopupMenuItem(
+                  value: _ListAction.moveUp,
+                  child: Text('Move up'),
+                ),
+              if (index < lists.length - 1)
+                const PopupMenuItem(
+                  value: _ListAction.moveDown,
+                  child: Text('Move down'),
+                ),
               const PopupMenuItem(
-                value: _ListAction.moveUp,
-                child: Text('Move up'),
+                value: _ListAction.rename,
+                child: Text('Rename'),
               ),
-            if (index < lists.length - 1)
               const PopupMenuItem(
-                value: _ListAction.moveDown,
-                child: Text('Move down'),
+                value: _ListAction.delete,
+                child: Text('Delete'),
               ),
-            const PopupMenuItem(
-              value: _ListAction.rename,
-              child: Text('Rename'),
-            ),
-            const PopupMenuItem(
-              value: _ListAction.delete,
-              child: Text('Delete'),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Widget _taskDropTarget(
+    BuildContext context,
+    WidgetRef ref,
+    ListId? listId,
+    Widget child,
+  ) => listId == null
+      ? child
+      : DragTarget<Task>(
+          onAcceptWithDetails: (details) =>
+              _moveTask(context, ref, details.data, listId),
+          builder: (context, candidates, rejected) => DecoratedBox(
+            decoration: BoxDecoration(
+              color: candidates.isEmpty
+                  ? null
+                  : Theme.of(context).colorScheme.secondaryContainer,
+            ),
+            child: child,
+          ),
+        );
+
+  Future<void> _moveTask(
+    BuildContext context,
+    WidgetRef ref,
+    Task task,
+    ListId destination,
+  ) async {
+    try {
+      await ref.read(taskRepositoryProvider).moveToList(task.id, destination);
+      ref.invalidate(tasksForListProvider(task.listId));
+      ref.invalidate(tasksForListProvider(destination));
+    } catch (error) {
+      debugPrint('Could not move task by drag: $error');
+      if (context.mounted) _showError(context, 'Could not move the task.');
+    }
   }
 
   Future<void> _moveList(

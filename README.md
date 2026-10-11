@@ -30,6 +30,8 @@ Native builds store the database in application support storage. Web builds stor
 
 Settings can export a versioned JSON backup and import a backup by replacing all current tasks, lists, and settings. Import validates the complete file before it writes. Files larger than 50 MiB are rejected. Keep an extra copy of important data before importing. Delete all data requires confirmation, removes tasks and custom lists, keeps Inbox, and resets settings.
 
+Completing a recurring task creates its next task once. Restoring and completing it again will not recreate that task if you moved, edited, completed, or deleted it.
+
 ## Notifications
 
 Local reminders apply to tasks with a due date and time. The app asks the operating system for the permissions each platform needs. Web notifications are not supported. Windows may keep a delivered notification in its history even after the task changes; pending reminders can still be canceled without package identity.
@@ -38,18 +40,18 @@ Local reminders apply to tasks with a due date and time. The app asks the operat
 
 - `Ctrl+N` or `Cmd+N` opens the new-task dialog.
 - `Ctrl+K` or `Cmd+K` opens search.
-- `Ctrl+Enter` or `Cmd+Enter` completes or restores the selected task.
+- `Ctrl+Enter` or `Cmd+Enter` saves the active task edit or quick-add field.
 - `Delete` asks for confirmation before deleting the selected task.
-- `Esc` clears the selected task.
-- Drag the task handle to reorder tasks. Drag the list handle to reorder custom lists.
-- Use the task and list action menus for duplicate, move, rename, and delete commands.
+- `Esc` closes the active dialog, clears quick-add text, or clears the selected task.
+- Drag the task handle to reorder tasks. Drag it to Inbox or a custom list to move the task and its subtasks.
+- Drag the list handle to reorder custom lists. Use the task and list action menus for duplicate, rename, and delete commands.
 
 The app ignores unmodified delete and escape shortcuts while a text field has focus. Modified shortcuts are app commands and remain available while entering text.
 
 ## Manual acceptance checklist
 
 - Resize the desktop window. Confirm that it cannot shrink below 800 by 600 pixels.
-- Create, edit, complete, restore, duplicate, move, reorder, and delete tasks. Confirm that Delete asks before removing a task.
+- Create, edit, complete, restore, duplicate, move, reorder, and delete tasks. Confirm that Delete asks before removing a task and Ctrl+Enter or Cmd+Enter saves edits without changing completion.
 - Create, rename, reorder by dragging, and delete custom lists. Confirm that Inbox cannot be deleted or renamed.
 - Use each keyboard shortcut. Type ordinary letters in task, search, and notes fields to confirm that text input remains intact.
 - Export a backup, import it into a test database, and confirm that tasks, lists, recurrence, and settings return. Try a malformed file and confirm that existing data stays unchanged.

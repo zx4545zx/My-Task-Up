@@ -63,10 +63,6 @@ class _AppShellState extends ConsumerState<AppShell>
         const SingleActivator(LogicalKeyboardKey.keyK, control: true):
             _openSearch,
         const SingleActivator(LogicalKeyboardKey.keyK, meta: true): _openSearch,
-        const SingleActivator(LogicalKeyboardKey.enter, control: true):
-            _toggleSelectedTask,
-        const SingleActivator(LogicalKeyboardKey.enter, meta: true):
-            _toggleSelectedTask,
         const SingleActivator(LogicalKeyboardKey.delete): _deleteSelectedTask,
         const SingleActivator(LogicalKeyboardKey.escape): _clearSelection,
       },
@@ -198,25 +194,6 @@ class _AppShellState extends ConsumerState<AppShell>
     if (!_hasModalRoute) context.go('/search');
   }
 
-  Future<void> _toggleSelectedTask() async {
-    if (_hasModalRoute || _isEditingText) return;
-    final taskId = ref.read(selectedTaskIdProvider);
-    if (taskId == null) return;
-    try {
-      final repository = ref.read(taskRepositoryProvider);
-      final task = await repository.get(taskId);
-      if (task == null) return;
-      if (task.isCompleted) {
-        await repository.restore(taskId, at: DateTime.now());
-      } else {
-        await repository.complete(taskId, at: DateTime.now());
-      }
-    } catch (error) {
-      debugPrint('Could not toggle selected task: $error');
-      if (mounted) _showShortcutError('Could not update the task.');
-    }
-  }
-
   Future<void> _deleteSelectedTask() async {
     if (_hasModalRoute || _isEditingText) return;
     final taskId = ref.read(selectedTaskIdProvider);
@@ -293,7 +270,34 @@ class _QuickTaskDialogState extends State<_QuickTaskDialog> {
   final _controller = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    HardwareKeyboard.instance.addHandler(_handleKeyboard);
+  }
+
+  bool _handleKeyboard(KeyEvent event) {
+    if (event is! KeyDownEvent ||
+        FocusManager.instance.primaryFocus?.context
+                ?.findAncestorStateOfType<_QuickTaskDialogState>() !=
+            this) {
+      return false;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.enter &&
+        (HardwareKeyboard.instance.isControlPressed ||
+            HardwareKeyboard.instance.isMetaPressed)) {
+      _save();
+      return true;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.escape) {
+      Navigator.pop(context);
+      return true;
+    }
+    return false;
+  }
+
+  @override
   void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleKeyboard);
     _controller.dispose();
     super.dispose();
   }

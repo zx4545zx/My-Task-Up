@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,7 +23,35 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
   final _titleController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    HardwareKeyboard.instance.addHandler(_handleKeyboard);
+  }
+
+  bool _handleKeyboard(KeyEvent event) {
+    if (event is! KeyDownEvent ||
+        FocusManager.instance.primaryFocus?.context
+                ?.findAncestorStateOfType<_TaskListPageState>() !=
+            this) {
+      return false;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.enter &&
+        (HardwareKeyboard.instance.isControlPressed ||
+            HardwareKeyboard.instance.isMetaPressed)) {
+      _createTask(_titleController.text);
+      return true;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.escape) {
+      _titleController.clear();
+      FocusManager.instance.primaryFocus?.unfocus();
+      return true;
+    }
+    return false;
+  }
+
+  @override
   void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleKeyboard);
     _titleController.dispose();
     super.dispose();
   }
@@ -95,7 +124,7 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
                                     newIndex,
                                   ),
                               itemBuilder: (context, index) =>
-                                  _buildTaskTile(active[index]),
+                                  _buildTaskTile(active[index], index: index),
                             ),
                           if (showCompleted && completed.isNotEmpty)
                             SliverToBoxAdapter(
@@ -137,11 +166,28 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
     }
   }
 
-  Widget _buildTaskTile(Task task) => ListTile(
+  Widget _buildTaskTile(Task task, {int? index}) => ListTile(
     key: ValueKey(task.id),
-    leading: Checkbox(
-      value: task.isCompleted,
-      onChanged: (_) => _toggleTask(task),
+    leading: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Checkbox(value: task.isCompleted, onChanged: (_) => _toggleTask(task)),
+        Draggable<Task>(
+          data: task,
+          feedback: Material(
+            elevation: 4,
+            child: SizedBox(
+              width: 240,
+              child: ListTile(title: Text(task.title.value)),
+            ),
+          ),
+          childWhenDragging: const Icon(Icons.drag_handle),
+          child: const Tooltip(
+            message: 'Move task to list',
+            child: Icon(Icons.drag_indicator),
+          ),
+        ),
+      ],
     ),
     title: Text(
       task.title.value,
@@ -152,28 +198,44 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
     subtitle: task.notes == null ? null : Text(task.notes!),
     selected: ref.watch(selectedTaskIdProvider) == task.id,
     onTap: () => _openTask(task.id),
-    trailing: PopupMenuButton<_TaskAction>(
-      tooltip: 'Task actions',
-      onSelected: (action) {
-        switch (action) {
-          case _TaskAction.toggle:
-            _toggleTask(task);
-          case _TaskAction.duplicate:
-            _duplicateTask(task);
-          case _TaskAction.delete:
-            _deleteTask(task);
-        }
-      },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: _TaskAction.toggle,
-          child: Text(task.isCompleted ? 'Restore' : 'Complete'),
+    trailing: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (index != null)
+          ReorderableDragStartListener(
+            index: index,
+            child: const Tooltip(
+              message: 'Reorder task',
+              child: Icon(Icons.drag_handle),
+            ),
+          ),
+        PopupMenuButton<_TaskAction>(
+          tooltip: 'Task actions',
+          onSelected: (action) {
+            switch (action) {
+              case _TaskAction.toggle:
+                _toggleTask(task);
+              case _TaskAction.duplicate:
+                _duplicateTask(task);
+              case _TaskAction.delete:
+                _deleteTask(task);
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: _TaskAction.toggle,
+              child: Text(task.isCompleted ? 'Restore' : 'Complete'),
+            ),
+            const PopupMenuItem(
+              value: _TaskAction.duplicate,
+              child: Text('Duplicate'),
+            ),
+            const PopupMenuItem(
+              value: _TaskAction.delete,
+              child: Text('Delete'),
+            ),
+          ],
         ),
-        const PopupMenuItem(
-          value: _TaskAction.duplicate,
-          child: Text('Duplicate'),
-        ),
-        const PopupMenuItem(value: _TaskAction.delete, child: Text('Delete')),
       ],
     ),
   );

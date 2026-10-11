@@ -51,6 +51,8 @@ final class BackupService {
               'id': task.id,
               'listId': task.listId,
               'parentId': task.parentId,
+              'recurrenceSeriesId': task.recurrenceSeriesId,
+              'nextOccurrenceId': task.nextOccurrenceId,
               'title': task.title,
               'notes': task.notes,
               'dueDay': task.dueDay,
@@ -155,6 +157,8 @@ final class BackupService {
     id: task.id.value,
     listId: task.listId.value,
     parentId: Value(task.parentId?.value),
+    recurrenceSeriesId: Value(task.recurrenceSeriesId?.value),
+    nextOccurrenceId: Value(task.nextOccurrenceId?.value),
     title: task.title.value,
     notes: Value(task.notes),
     dueDay: Value(task.due?.dayKey),
@@ -242,10 +246,24 @@ final class BackupService {
     if (parentId != null && parentId is! String) {
       throw const FormatException('Invalid task.parentId.');
     }
+    final recurrenceSeriesId = value['recurrenceSeriesId'];
+    if (recurrenceSeriesId != null && recurrenceSeriesId is! String) {
+      throw const FormatException('Invalid task.recurrenceSeriesId.');
+    }
+    final nextOccurrenceId = value['nextOccurrenceId'];
+    if (nextOccurrenceId != null && nextOccurrenceId is! String) {
+      throw const FormatException('Invalid task.nextOccurrenceId.');
+    }
     return Task(
       id: TaskId.parse(_string(value['id'], 'task.id')),
       listId: ListId.parse(_string(value['listId'], 'task.listId')),
       parentId: parentId == null ? null : TaskId.parse(parentId as String),
+      recurrenceSeriesId: recurrenceSeriesId == null
+          ? null
+          : TaskId.parse(recurrenceSeriesId as String),
+      nextOccurrenceId: nextOccurrenceId == null
+          ? null
+          : TaskId.parse(nextOccurrenceId as String),
       title: TaskTitle(_string(value['title'], 'task.title')),
       notes: notes as String?,
       due: due,
@@ -291,8 +309,8 @@ final class BackupService {
     if (!listIds.contains(settings.defaultListId.value)) {
       throw const FormatException('The default list does not exist.');
     }
-    final taskIds = tasks.map((task) => task.id.value).toSet();
-    if (taskIds.length != tasks.length) {
+    final tasksById = {for (final task in tasks) task.id: task};
+    if (tasksById.length != tasks.length) {
       throw const FormatException('Task IDs must be unique.');
     }
     for (final task in tasks) {
@@ -300,7 +318,7 @@ final class BackupService {
         throw const FormatException('A task refers to a missing list.');
       }
       if (task.parentId case final parentId?) {
-        final parent = tasks.where((item) => item.id == parentId).firstOrNull;
+        final parent = tasksById[parentId];
         if (parent == null ||
             parent.parentId != null ||
             parent.listId != task.listId) {

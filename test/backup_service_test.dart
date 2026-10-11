@@ -11,6 +11,9 @@ import 'package:my_task_up/features/lists/list_repository.dart';
 import 'package:my_task_up/features/settings/settings_repository.dart';
 import 'package:my_task_up/features/tasks/task_repository.dart';
 
+String _taskId(int index) =>
+    '00000000-0000-4000-8000-${index.toString().padLeft(12, '0')}';
+
 void main() {
   late AppDatabase database;
 
@@ -34,6 +37,9 @@ void main() {
     );
     final child = await tasks.createSubtask(root.id, 'Review checklist');
     await tasks.complete(child.id, at: DateTime.utc(2026, 10, 10));
+    await tasks.complete(root.id, at: DateTime.utc(2026, 10, 10));
+    final generatedId = (await tasks.get(root.id))!.nextOccurrenceId!;
+    await tasks.delete(generatedId);
     await SettingsRepository(database).update(
       defaultListId: work.id,
       showCompleted: false,
@@ -76,6 +82,16 @@ void main() {
     expect(imported?.due?.dayKey, 20270228);
     expect(imported?.due?.minute, 600);
     expect(imported?.repeat, isA<CustomRepeat>());
+    expect(imported?.recurrenceSeriesId, root.id);
+    expect(imported?.nextOccurrenceId, generatedId);
+    expect(await TaskRepository(destination).get(generatedId), isNull);
+    await TaskRepository(
+      destination,
+    ).restore(root.id, at: DateTime.utc(2026, 10, 11));
+    await TaskRepository(
+      destination,
+    ).complete(root.id, at: DateTime.utc(2026, 10, 12));
+    expect(await TaskRepository(destination).get(generatedId), isNull);
     expect(importedChild?.parentId, root.id);
     expect(importedChild?.isCompleted, isTrue);
     expect(importedSettings.defaultListId, work.id);
@@ -89,6 +105,61 @@ void main() {
         .select(destination.reminderRegistrations)
         .getSingle();
     expect(registration.state, 'pendingCancel');
+  });
+
+  test('imports a large backup with mixed parent and subtask rows', () async {
+    final backup =
+        jsonDecode(await BackupService(database).exportJson())
+            as Map<String, dynamic>;
+    final now = DateTime.utc(2026).millisecondsSinceEpoch;
+    final roots = [
+      for (var index = 0; index < 500; index++)
+        {
+          'id': _taskId(index),
+          'listId': ListId.inbox.value,
+          'parentId': null,
+          'title': 'Parent $index',
+          'notes': null,
+          'dueDay': null,
+          'dueMinute': null,
+          'repeat': {'type': 'never'},
+          'position': index,
+          'createdAt': now,
+          'updatedAt': now,
+          'completedAt': null,
+        },
+    ];
+    backup['tasks'] = [
+      ...roots,
+      for (var index = 0; index < 500; index++)
+        {
+          'id': _taskId(index + 500),
+          'listId': ListId.inbox.value,
+          'parentId': _taskId(index),
+          'title': 'Child $index',
+          'notes': null,
+          'dueDay': null,
+          'dueMinute': null,
+          'repeat': {'type': 'never'},
+          'position': 0,
+          'createdAt': now,
+          'updatedAt': now,
+          'completedAt': null,
+        },
+    ];
+
+    await BackupService(database).importJson(jsonEncode(backup));
+
+    final tasks = TaskRepository(database);
+    expect(await tasks.all(), hasLength(1000));
+    expect(
+      (await tasks.subtasksFor(TaskId.parse(_taskId(0)))).single.title.value,
+      'Child 0',
+    );
+    expect(
+      (await tasks.subtasksFor(TaskId.parse(_taskId(499)))).single.title.value,
+      'Child 499',
+    );
   });
 
   test('invalid relationship leaves all existing data unchanged', () async {

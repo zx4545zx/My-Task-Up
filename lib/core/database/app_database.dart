@@ -33,7 +33,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -64,6 +64,12 @@ class AppDatabase extends _$AppDatabase {
         await (update(appSettingsEntries)).write(
           const AppSettingsEntriesCompanion(notificationsEnabled: Value(false)),
         );
+      }
+      if (from < 3) {
+        await m.addColumn(tasks, tasks.recurrenceSeriesId);
+      }
+      if (from < 4) {
+        await m.addColumn(tasks, tasks.nextOccurrenceId);
       }
     },
   );

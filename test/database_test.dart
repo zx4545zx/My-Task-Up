@@ -63,6 +63,8 @@ void main() {
         position: 3,
         createdAt: now,
         updatedAt: now,
+        recurrenceSeriesId: TaskId.newId(),
+        nextOccurrenceId: TaskId.newId(),
       );
       await TaskRepository(database).save(task);
       await database.close();
@@ -78,10 +80,88 @@ void main() {
       expect(restored?.due?.dayKey, 20270228);
       expect(restored?.due?.minute, 540);
       expect(restored?.repeat, isA<CustomRepeat>());
+      expect(restored?.recurrenceSeriesId, task.recurrenceSeriesId);
+      expect(restored?.nextOccurrenceId, task.nextOccurrenceId);
       expect((restored!.repeat as CustomRepeat).weekdays, {
         Weekday.monday,
         Weekday.friday,
       });
+    },
+  );
+
+  test('adds recurrence identity to an existing version 2 database', () async {
+    final task = await TaskRepository(database).create(title: 'Existing task');
+    await database.customStatement(
+      'ALTER TABLE tasks DROP COLUMN recurrence_series_id',
+    );
+    await database.customStatement(
+      'ALTER TABLE tasks DROP COLUMN next_occurrence_id',
+    );
+    await database.customStatement('PRAGMA user_version = 2');
+    await database.close();
+
+    database = AppDatabase.forTesting(NativeDatabase(file));
+    expect(await TaskRepository(database).get(task.id), isNotNull);
+    final columns = await database
+        .customSelect('PRAGMA table_info(tasks)')
+        .get();
+    expect(
+      columns.any((column) => column.data['name'] == 'recurrence_series_id'),
+      isTrue,
+    );
+    expect(
+      columns.any((column) => column.data['name'] == 'next_occurrence_id'),
+      isTrue,
+    );
+    await database.close();
+    database = AppDatabase.forTesting(NativeDatabase(file));
+    expect(await TaskRepository(database).get(task.id), isNotNull);
+  });
+
+  test(
+    'adds occurrence linkage to version 3 without losing recurrence data',
+    () async {
+      final seriesId = TaskId.newId();
+      final task = await TaskRepository(
+        database,
+      ).create(title: 'Existing series');
+      await TaskRepository(database).save(
+        Task(
+          id: task.id,
+          listId: task.listId,
+          recurrenceSeriesId: seriesId,
+          title: task.title,
+          repeat: const DailyRepeat(),
+          due: LocalDue(year: 2026, month: 10, day: 5),
+          position: task.position,
+          createdAt: task.createdAt,
+          updatedAt: task.updatedAt,
+        ),
+      );
+      await database.customStatement(
+        'ALTER TABLE tasks DROP COLUMN next_occurrence_id',
+      );
+      await database.customStatement('PRAGMA user_version = 3');
+      await database.close();
+
+      database = AppDatabase.forTesting(NativeDatabase(file));
+      expect(
+        (await TaskRepository(database).get(task.id))?.recurrenceSeriesId,
+        seriesId,
+      );
+      final columns = await database
+          .customSelect('PRAGMA table_info(tasks)')
+          .get();
+      expect(
+        columns.any((column) => column.data['name'] == 'next_occurrence_id'),
+        isTrue,
+      );
+      await database.close();
+      database = AppDatabase.forTesting(NativeDatabase(file));
+      expect(
+        (await TaskRepository(database).get(task.id))?.recurrenceSeriesId,
+        seriesId,
+      );
     },
   );
 

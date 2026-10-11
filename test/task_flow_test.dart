@@ -101,6 +101,26 @@ void main() {
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.byTooltip('Choose due time'));
+    await tester.tap(find.byTooltip('Choose due time'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Switch to text input mode'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byWidgetPredicate(
+        (widget) => widget is TextField && widget.decoration?.hintText == '9',
+      ),
+      '10',
+    );
+    await tester.enterText(
+      find.byWidgetPredicate(
+        (widget) => widget is TextField && widget.decoration?.hintText == '00',
+      ),
+      '37',
+    );
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
     final repeatField = find.byType(DropdownButtonFormField<String>);
     await tester.ensureVisible(repeatField);
     await tester.tap(repeatField);
@@ -117,6 +137,7 @@ void main() {
       task.due?.dayKey,
       tomorrow.year * 10000 + tomorrow.month * 100 + tomorrow.day,
     );
+    expect(task.due?.minute, 637);
     expect(task.repeat, isA<DailyRepeat>());
   });
 }

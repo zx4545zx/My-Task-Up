@@ -111,6 +111,8 @@ final class Task {
     required this.createdAt,
     required this.updatedAt,
     this.parentId,
+    this.recurrenceSeriesId,
+    this.nextOccurrenceId,
     this.notes,
     this.due,
     this.completedAt,
@@ -121,6 +123,8 @@ final class Task {
   final TaskId id;
   final ListId listId;
   final TaskId? parentId;
+  final TaskId? recurrenceSeriesId;
+  final TaskId? nextOccurrenceId;
   final TaskTitle title;
   final String? notes;
   final LocalDue? due;

@@ -250,6 +250,8 @@ final class TaskRepository {
       id: existing.id,
       listId: existing.listId,
       parentId: existing.parentId,
+      recurrenceSeriesId: existing.recurrenceSeriesId,
+      nextOccurrenceId: existing.nextOccurrenceId,
       title: TaskTitle(title),
       notes: notes,
       due: due,
@@ -268,10 +270,21 @@ final class TaskRepository {
       final existing = await get(id);
       if (existing == null) throw StateError('Task does not exist.');
       if (existing.isCompleted) return existing;
+      final due = existing.due;
+      final nextDate = due == null
+          ? null
+          : nextDue(due, existing.repeat, anchorDayKey: due.dayKey);
+      final generatedId = nextDate != null && existing.nextOccurrenceId == null
+          ? TaskId.newId()
+          : null;
       final updated = Task(
         id: existing.id,
         listId: existing.listId,
         parentId: existing.parentId,
+        recurrenceSeriesId:
+            existing.recurrenceSeriesId ??
+            (existing.repeat is NeverRepeat ? null : existing.id),
+        nextOccurrenceId: existing.nextOccurrenceId ?? generatedId,
         title: existing.title,
         notes: existing.notes,
         due: existing.due,
@@ -283,51 +296,47 @@ final class TaskRepository {
       );
       await _save(updated);
 
-      if (existing.due case final due?) {
-        final nextDate = nextDue(
-          due,
-          existing.repeat,
-          anchorDayKey: due.dayKey,
-        );
-        if (nextDate != null) {
-          final siblings =
-              await (database.select(database.tasks)
-                    ..where(
-                      (task) =>
-                          task.listId.equals(existing.listId.value) &
-                          (existing.parentId == null
-                              ? task.parentId.isNull()
-                              : task.parentId.equals(existing.parentId!.value)),
-                    )
-                    ..orderBy([(task) => OrderingTerm.desc(task.position)])
-                    ..limit(1))
-                  .getSingleOrNull();
-          final repeat = switch (existing.repeat) {
+      if (nextDate != null && generatedId != null) {
+        final siblings =
+            await (database.select(database.tasks)
+                  ..where(
+                    (task) =>
+                        task.listId.equals(existing.listId.value) &
+                        (existing.parentId == null
+                            ? task.parentId.isNull()
+                            : task.parentId.equals(existing.parentId!.value)),
+                  )
+                  ..orderBy([(task) => OrderingTerm.desc(task.position)])
+                  ..limit(1))
+                .getSingleOrNull();
+        final repeat = switch (existing.repeat) {
+          CustomRepeat(
+            interval: RepeatInterval.weeks,
+            :final every,
+            :final weekdays,
+            anchorDayKey: null,
+          )
+              when weekdays.isNotEmpty =>
             CustomRepeat(
               interval: RepeatInterval.weeks,
-              :final every,
-              :final weekdays,
-              anchorDayKey: null,
-            )
-                when weekdays.isNotEmpty =>
-              CustomRepeat(
-                interval: RepeatInterval.weeks,
-                every: every,
-                weekdays: weekdays,
-                anchorDayKey: due.dayKey,
-              ),
-            MonthlyRepeat(anchorDayKey: null) => MonthlyRepeat(
-              anchorDayKey: due.dayKey,
+              every: every,
+              weekdays: weekdays,
+              anchorDayKey: due!.dayKey,
             ),
-            YearlyRepeat(anchorDayKey: null) => YearlyRepeat(
-              anchorDayKey: due.dayKey,
-            ),
-            _ => existing.repeat,
-          };
-          final occurrence = Task(
-            id: TaskId.newId(),
+          MonthlyRepeat(anchorDayKey: null) => MonthlyRepeat(
+            anchorDayKey: due!.dayKey,
+          ),
+          YearlyRepeat(anchorDayKey: null) => YearlyRepeat(
+            anchorDayKey: due!.dayKey,
+          ),
+          _ => existing.repeat,
+        };
+        await _save(
+          Task(
+            id: generatedId,
             listId: existing.listId,
             parentId: existing.parentId,
+            recurrenceSeriesId: existing.recurrenceSeriesId ?? existing.id,
             title: existing.title,
             notes: existing.notes,
             due: nextDate,
@@ -335,9 +344,8 @@ final class TaskRepository {
             position: (siblings?.position ?? -1) + 1,
             createdAt: at,
             updatedAt: at,
-          );
-          await _save(occurrence);
-        }
+          ),
+        );
       }
       return updated;
     });
@@ -353,6 +361,8 @@ final class TaskRepository {
       id: existing.id,
       listId: existing.listId,
       parentId: existing.parentId,
+      recurrenceSeriesId: existing.recurrenceSeriesId,
+      nextOccurrenceId: existing.nextOccurrenceId,
       title: existing.title,
       notes: existing.notes,
       due: existing.due,
@@ -456,6 +466,8 @@ final class TaskRepository {
             id: task.id.value,
             listId: task.listId.value,
             parentId: Value(task.parentId?.value),
+            recurrenceSeriesId: Value(task.recurrenceSeriesId?.value),
+            nextOccurrenceId: Value(task.nextOccurrenceId?.value),
             title: task.title.value,
             notes: Value(task.notes),
             dueDay: Value(task.due?.dayKey),
@@ -504,6 +516,12 @@ final class TaskRepository {
       id: TaskId.parse(row.id),
       listId: ListId.parse(row.listId),
       parentId: row.parentId == null ? null : TaskId.parse(row.parentId!),
+      recurrenceSeriesId: row.recurrenceSeriesId == null
+          ? null
+          : TaskId.parse(row.recurrenceSeriesId!),
+      nextOccurrenceId: row.nextOccurrenceId == null
+          ? null
+          : TaskId.parse(row.nextOccurrenceId!),
       title: TaskTitle(row.title),
       notes: row.notes,
       due: due,

@@ -102,6 +102,113 @@ void main() {
     },
   );
 
+  test(
+    'restoring and completing a recurring task keeps its next occurrence',
+    () async {
+      final task = await tasks.create(title: 'Take medicine');
+      await tasks.save(
+        Task(
+          id: task.id,
+          listId: task.listId,
+          title: task.title,
+          repeat: const DailyRepeat(),
+          position: task.position,
+          createdAt: task.createdAt,
+          updatedAt: task.updatedAt,
+          due: LocalDue(year: 2026, month: 10, day: 5, minute: 540),
+        ),
+      );
+
+      await tasks.complete(task.id, at: DateTime(2026, 10, 5, 9));
+      var occurrences = await tasks.forList(ListId.inbox);
+      final next = occurrences[1];
+      expect(next.recurrenceSeriesId, task.id);
+      await tasks.edit(
+        next.id,
+        title: 'Take medicine after breakfast',
+        notes: 'Doctor approved this change',
+        due: LocalDue(year: 2026, month: 10, day: 12, minute: 600),
+        repeat: next.repeat,
+      );
+      await tasks.complete(next.id, at: DateTime(2026, 10, 6, 9));
+      final later = await ListRepository(database).create('Later');
+      await tasks.moveToList(next.id, later.id);
+      await tasks.restore(task.id, at: DateTime(2026, 10, 7, 9));
+      await tasks.complete(task.id, at: DateTime(2026, 10, 7, 10));
+
+      occurrences = await tasks.all();
+      final retained = occurrences.singleWhere((item) => item.id == next.id);
+      expect(occurrences, hasLength(3));
+      expect(retained.title.value, 'Take medicine after breakfast');
+      expect(retained.notes, 'Doctor approved this change');
+      expect(retained.isCompleted, isTrue);
+      expect(retained.listId, later.id);
+      expect(retained.due?.dayKey, 20261012);
+      expect(retained.due?.minute, 600);
+    },
+  );
+
+  test('identical recurring roots generate distinct next tasks', () async {
+    final first = await tasks.create(title: 'Take vitamins');
+    final second = await tasks.create(title: 'Take vitamins');
+    for (final root in [first, second]) {
+      await tasks.save(
+        Task(
+          id: root.id,
+          listId: root.listId,
+          title: root.title,
+          repeat: const DailyRepeat(),
+          position: root.position,
+          createdAt: root.createdAt,
+          updatedAt: root.updatedAt,
+          due: LocalDue(year: 2026, month: 10, day: 5),
+        ),
+      );
+    }
+
+    await tasks.complete(first.id, at: DateTime(2026, 10, 5));
+    await tasks.complete(second.id, at: DateTime(2026, 10, 5));
+
+    final occurrences = await tasks.forList(ListId.inbox);
+    expect(occurrences, hasLength(4));
+    final firstNext = occurrences.singleWhere(
+      (task) => task.id != first.id && task.recurrenceSeriesId == first.id,
+    );
+    final secondNext = occurrences.singleWhere(
+      (task) => task.id != second.id && task.recurrenceSeriesId == second.id,
+    );
+    expect(firstNext.id, isNot(secondNext.id));
+  });
+
+  test(
+    'deleting a generated occurrence does not recreate it on restore',
+    () async {
+      final root = await tasks.create(title: 'Take vitamins');
+      await tasks.save(
+        Task(
+          id: root.id,
+          listId: root.listId,
+          title: root.title,
+          repeat: const DailyRepeat(),
+          position: root.position,
+          createdAt: root.createdAt,
+          updatedAt: root.updatedAt,
+          due: LocalDue(year: 2026, month: 10, day: 5),
+        ),
+      );
+
+      await tasks.complete(root.id, at: DateTime(2026, 10, 5));
+      final next = (await tasks.forList(
+        ListId.inbox,
+      )).singleWhere((task) => task.id != root.id);
+      await tasks.delete(next.id);
+      await tasks.restore(root.id, at: DateTime(2026, 10, 6));
+      await tasks.complete(root.id, at: DateTime(2026, 10, 6, 10));
+
+      expect(await tasks.forList(ListId.inbox), hasLength(1));
+    },
+  );
+
   test('monthly recurrence retains its original month-end day', () async {
     final task = await tasks.create(title: 'Pay rent');
     await tasks.save(

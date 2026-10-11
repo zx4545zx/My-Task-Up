@@ -24,6 +24,8 @@ class Tasks extends Table {
   TextColumn get id => text()();
   TextColumn get listId => text().references(TaskLists, #id)();
   TextColumn get parentId => text().nullable().references(Tasks, #id)();
+  TextColumn get recurrenceSeriesId => text().nullable()();
+  TextColumn get nextOccurrenceId => text().nullable()();
   TextColumn get title => text()();
   TextColumn get notes => text().nullable()();
   IntColumn get dueDay => integer().nullable()();
