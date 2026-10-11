@@ -6,6 +6,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:my_task_up/app/app.dart';
 import 'package:my_task_up/core/database/app_database.dart';
 import 'package:my_task_up/core/database/database_provider.dart';
+import 'package:my_task_up/core/domain/ids.dart';
 import 'package:my_task_up/features/lists/list_repository.dart';
 import 'package:my_task_up/features/tasks/task_repository.dart';
 import 'package:my_task_up/main.dart';
@@ -62,6 +63,18 @@ void main() {
     expect((await tasks.get(parent.id))!.listId, later.id);
     expect((await tasks.get(child.id))!.listId, later.id);
     expect((await tasks.get(child.id))!.parentId, parent.id);
+
+    await tester.tap(find.text('Later').first);
+    await tester.pumpAndSettle();
+    final inboxDrag = await tester.startGesture(
+      tester.getCenter(find.byTooltip('Move task to list').first),
+    );
+    await inboxDrag.moveTo(tester.getCenter(find.text('Inbox').first));
+    await tester.pump(const Duration(milliseconds: 500));
+    await inboxDrag.up();
+    await tester.pumpAndSettle();
+    expect((await tasks.get(parent.id))!.listId, ListId.inbox);
+    expect((await tasks.get(child.id))!.listId, ListId.inbox);
 
     await tester.tap(find.text('Alpha').first);
     await tester.pumpAndSettle();
